@@ -13,6 +13,7 @@ namespace Alexandria.Parser.Models
         [XmlAttribute("full-path")]
         public string FullPath { get; set; }
         
+        // TODO: This should probably be an enum
         [XmlAttribute("media-type")]
         public string MediaType { get; set; }
     }

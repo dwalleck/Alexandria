@@ -1,9 +1,11 @@
 ﻿using Alexandria.Parser.Models;
+using Alexandria.Parser.Models.Content;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Xml.Serialization;
+using System.Xml;
 
 namespace Alexandria.ConsoleTest
 {
@@ -19,7 +21,15 @@ namespace Alexandria.ConsoleTest
                 using (StreamReader reader = new StreamReader(containerFile.Open()))
                 {
                     var c = (Container)serializer.Deserialize(reader);
-                    Console.WriteLine(c.Rootfiles.FirstOrDefault().FullPath);
+                    var contentFilePath = c.Rootfiles.FirstOrDefault().FullPath;
+                    var contentFile = archive.GetEntry(contentFilePath);
+
+                    using (StreamReader contentFilereader = new StreamReader(contentFile.Open()))
+                    {   
+                        var cfSerializer = new XmlSerializer(typeof(Package));
+                        var package = (Package)cfSerializer.Deserialize(contentFilereader);
+                        Console.WriteLine("Done");
+                    }
                 }
             }
             
