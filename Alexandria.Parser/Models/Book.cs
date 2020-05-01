@@ -9,6 +9,17 @@ namespace Alexandria.Parser.Models
 {
     public class Book
     {
-        public string Title { get; set; }
+        public Book(string[] titles, string[] authors, List<string> chapters)
+        {
+            Titles = new List<string>(titles);
+            Chapters = chapters;
+            Authors = new List<string>(authors);
+        }
+
+        public List<string> Titles { get; set; }
+
+        public List<string> Chapters { get; set; }
+
+        public List<string> Authors { get; set; }
     }
 }

@@ -14,6 +14,6 @@ namespace Alexandria.Parser.Models.Content
         public string Id { get; set; }
 
         [XmlAttribute("media-type")]
-        public string MediaType { get; set; }
+        public MediaType MediaType { get; set; }
     }
 }

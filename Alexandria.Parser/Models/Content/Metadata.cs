@@ -17,7 +17,7 @@ namespace Alexandria.Parser.Models.Content
         public string[] Languages { get; set; }
 
         [XmlElement("creator", Namespace = "http://purl.org/dc/elements/1.1/")]
-        public string Author { get; set; }
+        public string[] Authors { get; set; }
 
         [XmlElement("meta")]
         public MetaItem[] MetaItems { get; set; }
