@@ -6,6 +6,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Serialization;
 using System.Xml;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Alexandria.ConsoleTest
 {
@@ -28,7 +30,16 @@ namespace Alexandria.ConsoleTest
                     {   
                         var cfSerializer = new XmlSerializer(typeof(Package));
                         var package = (Package)cfSerializer.Deserialize(contentFilereader);
-                        Console.WriteLine("Done");
+                        var pages = new List<string>();
+                        foreach (var manifest in package.ManifestItems)
+                        {
+                            var page = archive.GetEntry(manifest.Href);
+                            var read = new StreamReader(page.Open());
+                            var content = read.ReadToEnd();
+                            pages.Add(content);
+                            
+                        }
+                        Console.ReadLine();
                     }
                 }
             }
