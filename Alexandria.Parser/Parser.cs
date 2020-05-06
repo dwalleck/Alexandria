@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Alexandria.Parser.Models;
 using Alexandria.Parser.Models.Content;
+using System.Xml.Linq;
 
 namespace Alexandria.Parser
 {
@@ -37,6 +38,9 @@ namespace Alexandria.Parser
                             var page = archive.GetEntry(string.IsNullOrEmpty(contentFileDirectory) ? manifest.Href : $"{contentFileDirectory}/{manifest.Href}");
                             var read = new StreamReader(page.Open());
                             var content = await read.ReadToEndAsync();
+                            var xmlContent = XDocument.Parse(content);
+                            var body = xmlContent.Descendants("body");
+                            var cspan = content.AsMemory();
                             pages.Add(content);
 
                         }
