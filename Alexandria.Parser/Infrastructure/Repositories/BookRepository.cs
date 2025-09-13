@@ -1,7 +1,9 @@
 using Alexandria.Parser.Domain.Entities;
+using Alexandria.Parser.Domain.Errors;
 using Alexandria.Parser.Domain.Exceptions;
 using Alexandria.Parser.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using OneOf;
 
 namespace Alexandria.Parser.Infrastructure.Repositories;
 
@@ -19,12 +21,15 @@ public sealed class BookRepository : IBookRepository
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Book> LoadFromFileAsync(string filePath, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Book, ParsingError>> LoadFromFileAsync(string filePath, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         if (!File.Exists(filePath))
-            throw new FileNotFoundException($"EPUB file not found: {filePath}", filePath);
+        {
+            _logger.LogWarning("File not found: {FilePath}", filePath);
+            return new FileNotFoundError(filePath);
+        }
 
         try
         {
@@ -33,43 +38,48 @@ public sealed class BookRepository : IBookRepository
 
             return await _epubParser.ParseAsync(fileStream, cancellationToken);
         }
-        catch (EpubParsingException)
-        {
-            throw;
-        }
         catch (Exception ex)
         {
-            throw new EpubParsingException(filePath, ex.Message);
+            _logger.LogError(ex, "Failed to load book from file: {FilePath}", filePath);
+            return new ParsingFailedError($"Failed to load from {filePath}", ex);
         }
     }
 
-    public async Task<Book> LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Book, ParsingError>> LoadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stream);
 
         if (!stream.CanRead)
-            throw new ArgumentException("Stream must be readable", nameof(stream));
+        {
+            _logger.LogError("Stream is not readable");
+            return new InvalidFormatError("Invalid Stream", "Stream must be readable");
+        }
 
         return await _epubParser.ParseAsync(stream, cancellationToken);
     }
 
-    public async Task<Book> LoadFromBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Book, ParsingError>> LoadFromBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(bytes);
 
         if (bytes.Length == 0)
-            throw new ArgumentException("Byte array cannot be empty", nameof(bytes));
+        {
+            _logger.LogError("Byte array is empty");
+            return new InvalidFormatError("Invalid Input", "Byte array cannot be empty");
+        }
 
         using var memoryStream = new MemoryStream(bytes, writable: false);
         return await _epubParser.ParseAsync(memoryStream, cancellationToken);
     }
 
-    public async Task<bool> ValidateEpubAsync(string filePath, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, ValidationError>> ValidateEpubAsync(string filePath, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         if (!File.Exists(filePath))
-            return false;
+        {
+            return new ValidationError(new[] { $"File not found: {filePath}" });
+        }
 
         try
         {
@@ -78,18 +88,19 @@ public sealed class BookRepository : IBookRepository
 
             var result = await _epubParser.ValidateAsync(fileStream, cancellationToken);
 
-            if (!result.IsValid)
+            if (result.IsT1) // ValidationError
             {
+                var error = result.AsT1;
                 _logger.LogWarning("EPUB validation failed for {FilePath}: {Errors}",
-                    filePath, string.Join(", ", result.Errors));
+                    filePath, error.Message);
             }
 
-            return result.IsValid;
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error validating EPUB file: {FilePath}", filePath);
-            return false;
+            return new ValidationError(new[] { $"Validation failed: {ex.Message}" });
         }
     }
 }

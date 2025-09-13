@@ -1,7 +1,9 @@
 ﻿using Alexandria.Parser;
 using Alexandria.Parser.Application.UseCases.LoadBook;
+using Alexandria.Parser.Domain.Errors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OneOf;
 
 namespace Alexandria.ConsoleTest;
 
@@ -89,22 +91,23 @@ class Program
         var command = new LoadBookCommand(epubPath);
         var result = await loadBookHandler.HandleAsync(command);
 
-        if (result.IsSuccess && result.Book != null)
-        {
-            var book = result.Book;
-            Console.WriteLine($"Successfully loaded: {book.Title}");
-            Console.WriteLine($"Total chapters: {book.Chapters.Count}");
-
-            // Show first 3 chapter titles
-            foreach (var chapter in book.Chapters.Take(3))
+        result.Switch(
+            book =>
             {
-                Console.WriteLine($"  - Chapter {chapter.Order + 1}: {chapter.Title}");
+                Console.WriteLine($"Successfully loaded: {book.Title}");
+                Console.WriteLine($"Total chapters: {book.Chapters.Count}");
+
+                // Show first 3 chapter titles
+                foreach (var chapter in book.Chapters.Take(3))
+                {
+                    Console.WriteLine($"  - Chapter {chapter.Order + 1}: {chapter.Title}");
+                }
+            },
+            error =>
+            {
+                Console.WriteLine($"Failed to load book: {error.Message}");
             }
-        }
-        else
-        {
-            Console.WriteLine($"Failed to load book: {result.ErrorMessage}");
-        }
+        );
 
         Console.WriteLine();
     }

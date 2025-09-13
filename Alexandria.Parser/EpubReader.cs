@@ -1,10 +1,12 @@
 using Alexandria.Parser.Application.UseCases.LoadBook;
 using Alexandria.Parser.Domain.Entities;
+using Alexandria.Parser.Domain.Errors;
 using Alexandria.Parser.Domain.Interfaces;
 using Alexandria.Parser.Infrastructure.Parsers;
 using Alexandria.Parser.Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OneOf;
 
 namespace Alexandria.Parser;
 
@@ -44,12 +46,10 @@ public sealed class EpubReader
         var command = new LoadBookCommand(filePath);
         var result = await _loadBookHandler.HandleAsync(command, cancellationToken);
 
-        if (!result.IsSuccess)
-        {
-            throw new InvalidOperationException(result.ErrorMessage ?? "Failed to load book");
-        }
-
-        return result.Book!;
+        return result.Match<Book>(
+            book => book,
+            error => throw new InvalidOperationException(error.Message)
+        );
     }
 
     /// <summary>
@@ -57,7 +57,12 @@ public sealed class EpubReader
     /// </summary>
     public async Task<Book> LoadBookAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        return await _bookRepository.LoadFromStreamAsync(stream, cancellationToken);
+        var result = await _bookRepository.LoadFromStreamAsync(stream, cancellationToken);
+
+        return result.Match<Book>(
+            book => book,
+            error => throw new InvalidOperationException(error.Message)
+        );
     }
 
     /// <summary>
@@ -65,7 +70,12 @@ public sealed class EpubReader
     /// </summary>
     public async Task<Book> LoadBookAsync(byte[] bytes, CancellationToken cancellationToken = default)
     {
-        return await _bookRepository.LoadFromBytesAsync(bytes, cancellationToken);
+        var result = await _bookRepository.LoadFromBytesAsync(bytes, cancellationToken);
+
+        return result.Match<Book>(
+            book => book,
+            error => throw new InvalidOperationException(error.Message)
+        );
     }
 
     /// <summary>
@@ -73,7 +83,21 @@ public sealed class EpubReader
     /// </summary>
     public async Task<bool> ValidateAsync(string filePath, CancellationToken cancellationToken = default)
     {
-        return await _bookRepository.ValidateEpubAsync(filePath, cancellationToken);
+        var result = await _bookRepository.ValidateEpubAsync(filePath, cancellationToken);
+
+        return result.Match(
+            success => true,
+            error => false
+        );
+    }
+
+    /// <summary>
+    /// Loads a book from a file path with OneOf result
+    /// </summary>
+    public async Task<OneOf<Book, ParsingError>> TryLoadBookAsync(string filePath, CancellationToken cancellationToken = default)
+    {
+        var command = new LoadBookCommand(filePath);
+        return await _loadBookHandler.HandleAsync(command, cancellationToken);
     }
 
     /// <summary>

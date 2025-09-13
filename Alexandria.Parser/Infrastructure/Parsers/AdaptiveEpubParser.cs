@@ -1,6 +1,8 @@
 using Alexandria.Parser.Domain.Entities;
+using Alexandria.Parser.Domain.Errors;
 using Alexandria.Parser.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using OneOf;
 
 namespace Alexandria.Parser.Infrastructure.Parsers;
 
@@ -18,7 +20,7 @@ public sealed class AdaptiveEpubParser : IEpubParser
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Book> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Book, ParsingError>> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(epubStream);
 
@@ -32,17 +34,27 @@ public sealed class AdaptiveEpubParser : IEpubParser
         try
         {
             // Get the appropriate parser based on version
-            var parser = await _parserFactory.CreateParserAsync(memoryStream, cancellationToken);
+            var parserResult = await _parserFactory.CreateParserAsync(memoryStream, cancellationToken);
+
+            if (parserResult.IsT1) // ParsingError
+            {
+                return parserResult.AsT1;
+            }
+
+            var parser = parserResult.AsT0;
 
             // Reset stream for actual parsing
             memoryStream.Position = 0;
 
             // Parse with the version-specific parser
-            var book = await parser.ParseAsync(memoryStream, cancellationToken);
+            var result = await parser.ParseAsync(memoryStream, cancellationToken);
 
-            _logger.LogInformation("Successfully parsed EPUB with adaptive parser");
+            if (result.IsT0) // Book
+            {
+                _logger.LogInformation("Successfully parsed EPUB with adaptive parser");
+            }
 
-            return book;
+            return result;
         }
         finally
         {
@@ -50,7 +62,7 @@ public sealed class AdaptiveEpubParser : IEpubParser
         }
     }
 
-    public async Task<ValidationResult> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, ValidationError>> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(epubStream);
 
@@ -64,7 +76,14 @@ public sealed class AdaptiveEpubParser : IEpubParser
         try
         {
             // Get the appropriate parser based on version
-            var parser = await _parserFactory.CreateParserAsync(memoryStream, cancellationToken);
+            var parserResult = await _parserFactory.CreateParserAsync(memoryStream, cancellationToken);
+
+            if (parserResult.IsT1) // ParsingError
+            {
+                return new ValidationError(new[] { parserResult.AsT1.Message });
+            }
+
+            var parser = parserResult.AsT0;
 
             // Reset stream for actual validation
             memoryStream.Position = 0;

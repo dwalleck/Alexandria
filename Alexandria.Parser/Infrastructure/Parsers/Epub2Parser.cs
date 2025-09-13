@@ -1,11 +1,13 @@
 using System.IO.Compression;
 using System.Xml.Serialization;
 using Alexandria.Parser.Domain.Entities;
+using Alexandria.Parser.Domain.Errors;
 using Alexandria.Parser.Domain.Exceptions;
 using Alexandria.Parser.Domain.Interfaces;
 using Alexandria.Parser.Domain.ValueObjects;
 using Alexandria.Parser.Infrastructure.Parsers.Models.Epub2;
 using Microsoft.Extensions.Logging;
+using OneOf;
 
 namespace Alexandria.Parser.Infrastructure.Parsers;
 
@@ -23,7 +25,7 @@ public sealed class Epub2Parser : IEpubParser
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Book> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Book, ParsingError>> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(epubStream);
 
@@ -59,17 +61,19 @@ public sealed class Epub2Parser : IEpubParser
 
             return book;
         }
-        catch (InvalidEpubStructureException)
+        catch (InvalidEpubStructureException ex)
         {
-            throw;
+            _logger.LogError(ex, "Invalid EPUB structure");
+            return new InvalidStructureError(ex.MissingComponent ?? "Unknown", ex.Message);
         }
         catch (Exception ex)
         {
-            throw new EpubParsingException("Failed to parse EPUB stream", ex);
+            _logger.LogError(ex, "Failed to parse EPUB stream");
+            return new ParsingFailedError(ex.Message, ex);
         }
     }
 
-    public async Task<ValidationResult> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, ValidationError>> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default)
     {
         var errors = new List<string>();
 
@@ -81,13 +85,19 @@ public sealed class Epub2Parser : IEpubParser
             if (archive.GetEntry(ContainerPath) == null)
             {
                 errors.Add("Missing META-INF/container.xml");
-                return ValidationResult.Invalid(errors.ToArray());
+                return new ValidationError(errors);
             }
 
             // Try to parse the EPUB
-            await ParseAsync(epubStream, cancellationToken);
+            var parseResult = await ParseAsync(epubStream, cancellationToken);
 
-            return ValidationResult.Valid();
+            if (parseResult.IsT1) // ParsingError
+            {
+                errors.Add(parseResult.AsT1.Message);
+                return new ValidationError(errors);
+            }
+
+            return Success.Instance;
         }
         catch (InvalidEpubStructureException ex)
         {
@@ -98,7 +108,7 @@ public sealed class Epub2Parser : IEpubParser
             errors.Add($"Validation failed: {ex.Message}");
         }
 
-        return ValidationResult.Invalid(errors.ToArray());
+        return new ValidationError(errors);
     }
 
     private async Task<Book> BuildBookAsync(

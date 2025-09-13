@@ -1,6 +1,8 @@
 using Alexandria.Parser.Domain.Enums;
+using Alexandria.Parser.Domain.Errors;
 using Alexandria.Parser.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using OneOf;
 
 namespace Alexandria.Parser.Infrastructure.Parsers;
 
@@ -20,22 +22,30 @@ public sealed class EpubParserFactory : IEpubParserFactory
         _versionDetector = new EpubVersionDetector(loggerFactory.CreateLogger<EpubVersionDetector>());
     }
 
-    public async Task<IEpubParser> CreateParserAsync(Stream epubStream, CancellationToken cancellationToken = default)
+    public async Task<OneOf<IEpubParser, ParsingError>> CreateParserAsync(Stream epubStream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(epubStream);
 
-        // Detect version
-        var version = await _versionDetector.DetectVersionAsync(epubStream, cancellationToken);
-
-        _logger.LogInformation("Creating parser for EPUB version: {Version}", version);
-
-        // Reset stream position after version detection
-        if (epubStream.CanSeek)
+        try
         {
-            epubStream.Position = 0;
-        }
+            // Detect version
+            var version = await _versionDetector.DetectVersionAsync(epubStream, cancellationToken);
 
-        return CreateParser(version);
+            _logger.LogInformation("Creating parser for EPUB version: {Version}", version);
+
+            // Reset stream position after version detection
+            if (epubStream.CanSeek)
+            {
+                epubStream.Position = 0;
+            }
+
+            return OneOf<IEpubParser, ParsingError>.FromT0(CreateParser(version));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create parser");
+            return new ParsingFailedError("Failed to detect EPUB version", ex);
+        }
     }
 
     public IEpubParser CreateParser(EpubVersion version)
@@ -58,6 +68,6 @@ public sealed class EpubParserFactory : IEpubParserFactory
 
 public interface IEpubParserFactory
 {
-    Task<IEpubParser> CreateParserAsync(Stream epubStream, CancellationToken cancellationToken = default);
+    Task<OneOf<IEpubParser, ParsingError>> CreateParserAsync(Stream epubStream, CancellationToken cancellationToken = default);
     IEpubParser CreateParser(EpubVersion version);
 }

@@ -1,25 +1,31 @@
 using Alexandria.Parser.Domain.Entities;
+using Alexandria.Parser.Domain.Errors;
+using OneOf;
 
 namespace Alexandria.Parser.Domain.Interfaces;
 
 /// <summary>
-/// Interface for parsing EPUB content
+/// Interface for parsing EPUB content using OneOf for result types
 /// </summary>
 public interface IEpubParser
 {
     /// <summary>
     /// Parses an EPUB file from a stream
     /// </summary>
-    Task<Book> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default);
+    /// <returns>Either a Book or a ParsingError</returns>
+    Task<OneOf<Book, ParsingError>> ParseAsync(Stream epubStream, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Validates the EPUB structure
     /// </summary>
-    Task<ValidationResult> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default);
+    /// <returns>Either Success (true) or ValidationError</returns>
+    Task<OneOf<Success, ValidationError>> ValidateAsync(Stream epubStream, CancellationToken cancellationToken = default);
 }
 
-public record ValidationResult(bool IsValid, IReadOnlyList<string> Errors)
+/// <summary>
+/// Represents a successful operation with no return value
+/// </summary>
+public readonly struct Success
 {
-    public static ValidationResult Valid() => new(true, Array.Empty<string>());
-    public static ValidationResult Invalid(params string[] errors) => new(false, errors);
+    public static Success Instance => default;
 }
