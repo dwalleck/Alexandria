@@ -19,7 +19,7 @@ public sealed record Author
     public string? Role { get; }
     public string? FileAs { get; }
 
-    public override string ToString() => Name;
+    public override string ToString() => !string.IsNullOrEmpty(Role) ? $"{Name} ({Role})" : Name;
 
     /// <summary>
     /// Gets the last name (assumes last word is last name)

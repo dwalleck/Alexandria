@@ -49,7 +49,7 @@ public class AuthorTests
         // Act & Assert
         await Assert.That(() => new Author(name!))
             .Throws<ArgumentException>()
-            .WithMessage("Author name cannot be empty");
+            .WithMessage("Author name cannot be empty (Parameter 'name')");
     }
 
     [Test]

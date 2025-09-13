@@ -24,8 +24,8 @@ public class BookMetadataTests
         };
         var identifiers = new[]
         {
-            new BookIdentifier("isbn", "978-0-123456-78-9"),
-            new BookIdentifier("uuid", "123e4567-e89b-12d3-a456-426614174000")
+            new BookIdentifier("978-0-123456-78-9", "isbn"),
+            new BookIdentifier("123e4567-e89b-12d3-a456-426614174000", "uuid")
         };
         var language = new Language("en");
         var metadata = new BookMetadata(
@@ -141,7 +141,7 @@ public class BookMetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             BookMetadata.Empty
         );
@@ -214,7 +214,7 @@ public class BookMetadataTests
             null,
             new Author[] { }, // Empty authors array
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             BookMetadata.Empty
         )).Throws<ArgumentException>();
@@ -234,7 +234,7 @@ public class BookMetadataTests
                 new Author("Alice Brown", "Author")
             },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("isbn", "978-0-123456-78-9") },
+            new[] { new BookIdentifier("978-0-123456-78-9", "isbn") },
             new Language("en"),
             new BookMetadata(publisher: "Test Publisher", publicationDate: new DateTime(2024, 1, 1))
         );
@@ -255,7 +255,7 @@ public class BookMetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             BookMetadata.Empty
         );

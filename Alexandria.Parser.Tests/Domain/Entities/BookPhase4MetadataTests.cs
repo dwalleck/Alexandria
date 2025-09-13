@@ -27,7 +27,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("John Doe") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("isbn", "978-0-316-76948-0") },
+            new[] { new BookIdentifier("978-0-316-76948-0", "isbn") },
             new Language("en"),
             metadata
         );
@@ -40,7 +40,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("Jane Doe") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             BookMetadata.Empty
         );
@@ -166,7 +166,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             metadata
         );
@@ -194,7 +194,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             metadata
         );
@@ -232,7 +232,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("isbn", "978-0-316-76948-0") },
+            new[] { new BookIdentifier("978-0-316-76948-0", "isbn") },
             new Language("en"),
             metadata
         );
@@ -257,7 +257,7 @@ public class BookPhase4MetadataTests
             null,
             new[] { new Author("Author") },
             new[] { new Chapter("ch1", "Chapter 1", "Content", 0) },
-            new[] { new BookIdentifier("uuid", "123") },
+            new[] { new BookIdentifier("123", "uuid") },
             new Language("en"),
             metadata
         );

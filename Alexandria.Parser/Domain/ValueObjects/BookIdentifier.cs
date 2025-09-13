@@ -24,5 +24,5 @@ public sealed record BookIdentifier
     public bool IsUuid => Scheme == "UUID";
     public bool IsDoi => Scheme == "DOI";
 
-    public override string ToString() => $"{Scheme}:{Value}";
+    public override string ToString() => $"{Scheme}: {Value}";
 }
