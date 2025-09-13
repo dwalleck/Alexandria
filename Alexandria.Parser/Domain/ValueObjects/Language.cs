@@ -5,10 +5,10 @@ namespace Alexandria.Parser.Domain.ValueObjects;
 /// </summary>
 public sealed record Language
 {
-    private static readonly HashSet<string> CommonLanguageCodes = new()
-    {
+    private static readonly HashSet<string> CommonLanguageCodes =
+    [
         "EN", "ES", "FR", "DE", "IT", "PT", "RU", "ZH", "JA", "KO", "AR", "HI"
-    };
+    ];
 
     public Language(string code)
     {

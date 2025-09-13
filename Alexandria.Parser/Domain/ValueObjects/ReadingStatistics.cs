@@ -15,7 +15,7 @@ public sealed class ReadingStatistics
         TotalWords = totalWords;
         TotalSentences = totalSentences;
         TotalReadingTime = totalReadingTime;
-        ChapterStatistics = chapterStatistics?.ToList() ?? new List<ChapterStatistics>();
+        ChapterStatistics = chapterStatistics?.ToList() ?? [];
         WordsPerMinute = wordsPerMinute;
         AverageWordsPerChapter = ChapterStatistics.Count > 0 ? TotalWords / ChapterStatistics.Count : 0;
         AverageSentencesPerChapter = ChapterStatistics.Count > 0 ? TotalSentences / ChapterStatistics.Count : 0;

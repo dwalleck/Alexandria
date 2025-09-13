@@ -32,7 +32,7 @@ public sealed class NavigationItem
         Href = href;
         PlayOrder = playOrder;
         Level = level;
-        _children = children?.ToList() ?? new List<NavigationItem>();
+        _children = children?.ToList() ?? [];
 
         // Validate children don't have invalid levels
         foreach (var child in _children)

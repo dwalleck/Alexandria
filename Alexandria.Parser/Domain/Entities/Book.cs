@@ -27,7 +27,7 @@ public sealed class Book
         ResourceCollection? resources = null)
     {
         Title = title ?? throw new ArgumentNullException(nameof(title));
-        AlternateTitles = alternateTitles?.ToList() ?? new List<BookTitle>();
+        AlternateTitles = alternateTitles?.ToList() ?? [];
         _authors = authors?.ToList() ?? throw new ArgumentNullException(nameof(authors));
         _chapters = chapters?.ToList() ?? throw new ArgumentNullException(nameof(chapters));
         _identifiers = identifiers?.ToList() ?? throw new ArgumentNullException(nameof(identifiers));
@@ -255,138 +255,7 @@ public sealed class Book
 
     #endregion
 
-    #region Content Processing Methods
-
-    /// <summary>
-    /// Searches for a term across all chapters
-    /// </summary>
-    public IEnumerable<SearchResult> Search(string searchTerm, SearchOptions? options = null)
-    {
-        var contentProcessor = new ContentProcessor();
-        var searchService = new SearchService(contentProcessor);
-        return searchService.Search(this, searchTerm, options);
-    }
-
-    /// <summary>
-    /// Searches for all terms (AND logic)
-    /// </summary>
-    public IEnumerable<SearchResult> SearchAll(IEnumerable<string> searchTerms, SearchOptions? options = null)
-    {
-        var contentProcessor = new ContentProcessor();
-        var searchService = new SearchService(contentProcessor);
-        return searchService.SearchAll(this, searchTerms, options);
-    }
-
-    /// <summary>
-    /// Searches for any of the terms (OR logic)
-    /// </summary>
-    public IEnumerable<SearchResult> SearchAny(IEnumerable<string> searchTerms, SearchOptions? options = null)
-    {
-        var contentProcessor = new ContentProcessor();
-        var searchService = new SearchService(contentProcessor);
-        return searchService.SearchAny(this, searchTerms, options);
-    }
-
-    /// <summary>
-    /// Gets the plain text content of a specific chapter
-    /// </summary>
-    public string GetChapterPlainText(string chapterId)
-    {
-        var chapter = GetChapterById(chapterId);
-        if (chapter == null)
-            return string.Empty;
-
-        var contentProcessor = new ContentProcessor();
-        return contentProcessor.ExtractPlainText(chapter.Content);
-    }
-
-    /// <summary>
-    /// Gets the plain text content of all chapters
-    /// </summary>
-    public string GetFullPlainText()
-    {
-        var contentProcessor = new ContentProcessor();
-        var texts = _chapters.Select(c => contentProcessor.ExtractPlainText(c.Content));
-        return string.Join("\n\n", texts);
-    }
-
-    /// <summary>
-    /// Extracts a preview of the book content
-    /// </summary>
-    public string GetPreview(int maxLength = 500)
-    {
-        if (_chapters.Count == 0)
-            return string.Empty;
-
-        var contentProcessor = new ContentProcessor();
-        var firstChapterText = contentProcessor.ExtractPlainText(_chapters[0].Content);
-
-        if (firstChapterText.Length <= maxLength)
-            return firstChapterText;
-
-        var preview = firstChapterText.Substring(0, maxLength);
-        var lastSpace = preview.LastIndexOf(' ');
-        if (lastSpace > maxLength * 0.8)
-        {
-            preview = preview.Substring(0, lastSpace);
-        }
-
-        return preview.Trim() + "...";
-    }
-
-    /// <summary>
-    /// Gets reading statistics for the book
-    /// </summary>
-    public ReadingStatistics GetReadingStatistics(int wordsPerMinute = 250)
-    {
-        var contentProcessor = new ContentProcessor();
-        var chapterStats = new List<ChapterStatistics>();
-
-        foreach (var chapter in _chapters)
-        {
-            var wordCount = contentProcessor.CountWords(chapter.Content);
-            var readingTime = contentProcessor.EstimateReadingTime(chapter.Content, wordsPerMinute);
-            var sentences = contentProcessor.ExtractSentences(chapter.Content).Count();
-
-            chapterStats.Add(new ChapterStatistics(
-                chapter.Id,
-                chapter.Title,
-                wordCount,
-                sentences,
-                readingTime
-            ));
-        }
-
-        var totalWords = chapterStats.Sum(c => c.WordCount);
-        var totalSentences = chapterStats.Sum(c => c.SentenceCount);
-        var totalReadingTime = TimeSpan.FromMinutes(chapterStats.Sum(c => c.ReadingTime.TotalMinutes));
-
-        return new ReadingStatistics(
-            totalWords,
-            totalSentences,
-            totalReadingTime,
-            chapterStats,
-            wordsPerMinute
-        );
-    }
-
-    /// <summary>
-    /// Finds all chapters containing a specific term
-    /// </summary>
-    public IEnumerable<Chapter> FindChaptersWithTerm(string term)
-    {
-        if (string.IsNullOrWhiteSpace(term))
-            return Enumerable.Empty<Chapter>();
-
-        var contentProcessor = new ContentProcessor();
-        return _chapters.Where(c =>
-        {
-            var plainText = contentProcessor.ExtractPlainText(c.Content);
-            return plainText.Contains(term, StringComparison.OrdinalIgnoreCase);
-        });
-    }
-
-    #endregion
+    
 
     #region Metadata Methods
 

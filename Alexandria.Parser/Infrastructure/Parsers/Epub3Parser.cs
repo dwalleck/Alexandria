@@ -131,7 +131,7 @@ public sealed class Epub3Parser : IEpubParser
         var metadata = package.Metadata!;
 
         // Extract titles
-        var titles = metadata.Titles?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList() ?? new List<string>();
+        var titles = metadata.Titles?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList() ?? [];
         if (titles.Count == 0)
             throw new InvalidEpubStructureException("No title found in metadata", "content.opf");
 
@@ -174,7 +174,7 @@ public sealed class Epub3Parser : IEpubParser
                 var scheme = GetRefinementValue(metadata.MetaItems, i.Id, "identifier-type") ?? "Unknown";
                 return new BookIdentifier(i.Value!, scheme);
             })
-            .ToList() ?? new List<BookIdentifier>();
+            .ToList() ?? [];
 
         // Extract language
         var languageCode = metadata.Languages?.FirstOrDefault() ?? "en";
@@ -248,7 +248,7 @@ public sealed class Epub3Parser : IEpubParser
         var chapters = new List<Chapter>();
         var manifestMap = package.ManifestItems?
             .Where(m => m.Id != null)
-            .ToDictionary(m => m.Id!, m => m) ?? new Dictionary<string, ManifestItemXml>();
+            .ToDictionary(m => m.Id!, m => m) ?? [];
 
         // Find the navigation document (EPUB 3 specific)
         var navItem = package.ManifestItems?

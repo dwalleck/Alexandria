@@ -82,7 +82,7 @@ public sealed class ContentProcessor
         if (start > 0)
             snippet = "..." + snippet;
         if (end < plainText.Length)
-            snippet = snippet + "...";
+            snippet += "...";
 
         return snippet;
     }
@@ -145,11 +145,11 @@ public sealed class ContentProcessor
             return plainText;
 
         // Try to break at a word boundary
-        var preview = plainText.Substring(0, maxLength);
+        var preview = plainText[..maxLength];
         var lastSpace = preview.LastIndexOf(' ');
         if (lastSpace > maxLength * 0.8) // If we're close enough to the end
         {
-            preview = preview.Substring(0, lastSpace);
+            preview = preview[..lastSpace];
         }
 
         return preview.Trim() + "...";

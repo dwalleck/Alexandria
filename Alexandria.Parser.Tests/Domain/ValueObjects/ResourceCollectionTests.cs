@@ -10,14 +10,14 @@ public class ResourceCollectionTests
 {
     private static List<EpubResource> CreateTestResources()
     {
-        return new List<EpubResource>
-        {
+        return
+        [
             new EpubResource("img1", "images/cover.jpg", "image/jpeg", Encoding.UTF8.GetBytes("cover")),
             new EpubResource("img2", "images/chapter1.png", "image/png", Encoding.UTF8.GetBytes("ch1")),
             new EpubResource("css1", "styles/main.css", "text/css", Encoding.UTF8.GetBytes("css")),
             new EpubResource("font1", "fonts/main.ttf", "font/ttf", Encoding.UTF8.GetBytes("font")),
             new EpubResource("ch1", "chapter1.xhtml", "application/xhtml+xml", Encoding.UTF8.GetBytes("html"))
-        };
+        ];
     }
 
     [Test]

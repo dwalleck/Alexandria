@@ -18,7 +18,7 @@ public class NavigationStructureTests
 
         var ch3 = new NavigationItem("ch3", "Chapter 3", "chapter3.xhtml", 6, 0);
 
-        return new List<NavigationItem> { ch1, ch2, ch3 };
+        return [ch1, ch2, ch3];
     }
 
     [Test]

@@ -9,12 +9,12 @@ namespace Alexandria.Parser.Tests.Utilities;
 /// </summary>
 public class TestEpubBuilder
 {
-    private readonly List<(string path, string content)> _files = new();
+    private readonly List<(string path, string content)> _files = [];
     private string _version = "2.0.1";
     private string _title = "Test Book";
     private string _author = "Test Author";
     private string _language = "en";
-    private readonly List<(string id, string href, string content)> _chapters = new();
+    private readonly List<(string id, string href, string content)> _chapters = [];
 
     public TestEpubBuilder WithVersion(string version)
     {

@@ -11,9 +11,9 @@ namespace Alexandria.Parser.Models
     {
         public Book(string[] titles, string[] authors, List<string> chapters)
         {
-            Titles = new List<string>(titles);
+            Titles = [.. titles];
             Chapters = chapters;
-            Authors = new List<string>(authors);
+            Authors = [.. authors];
         }
 
         public List<string> Titles { get; set; }

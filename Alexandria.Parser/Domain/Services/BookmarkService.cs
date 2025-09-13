@@ -8,9 +8,9 @@ namespace Alexandria.Parser.Domain.Services;
 /// </summary>
 public sealed class BookmarkService
 {
-    private readonly Dictionary<string, List<Bookmark>> _bookmarksByBook = new();
-    private readonly Dictionary<string, List<Annotation>> _annotationsByBook = new();
-    private readonly Dictionary<string, ReadingProgress> _readingProgress = new();
+    private readonly Dictionary<string, List<Bookmark>> _bookmarksByBook = [];
+    private readonly Dictionary<string, List<Annotation>> _annotationsByBook = [];
+    private readonly Dictionary<string, ReadingProgress> _readingProgress = [];
 
     /// <summary>
     /// Adds a bookmark to a book
@@ -25,7 +25,7 @@ public sealed class BookmarkService
         var bookmark = Bookmark.Create(chapterId, chapter.Title, position, note, contextText);
 
         if (!_bookmarksByBook.ContainsKey(book.Title.Value))
-            _bookmarksByBook[book.Title.Value] = new List<Bookmark>();
+            _bookmarksByBook[book.Title.Value] = [];
 
         _bookmarksByBook[book.Title.Value].Add(bookmark);
         return bookmark;
@@ -86,7 +86,7 @@ public sealed class BookmarkService
         var annotation = Annotation.Create(chapterId, startPosition, endPosition, highlightedText, color, note);
 
         if (!_annotationsByBook.ContainsKey(book.Title.Value))
-            _annotationsByBook[book.Title.Value] = new List<Annotation>();
+            _annotationsByBook[book.Title.Value] = [];
 
         _annotationsByBook[book.Title.Value].Add(annotation);
         return annotation;

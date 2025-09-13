@@ -21,8 +21,7 @@ public sealed class SearchService
     /// </summary>
     public IEnumerable<SearchResult> Search(Book book, string searchTerm, SearchOptions? options = null)
     {
-        if (book == null)
-            throw new ArgumentNullException(nameof(book));
+        ArgumentNullException.ThrowIfNull(book);
 
         if (string.IsNullOrWhiteSpace(searchTerm))
             return Enumerable.Empty<SearchResult>();
@@ -46,11 +45,10 @@ public sealed class SearchService
     /// </summary>
     public IEnumerable<SearchResult> SearchAll(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null)
     {
-        if (book == null)
-            throw new ArgumentNullException(nameof(book));
+        ArgumentNullException.ThrowIfNull(book);
 
         var terms = searchTerms?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-        if (terms == null || !terms.Any())
+        if (terms == null || terms.Count == 0)
             return Enumerable.Empty<SearchResult>();
 
         options ??= new SearchOptions();
@@ -77,7 +75,7 @@ public sealed class SearchService
                     score += termMatches.Count;
                 }
 
-                if (matches.Any())
+                if (matches.Count != 0)
                 {
                     var snippet = _contentProcessor.ExtractSnippet(chapter.Content, terms.First(), options.SnippetLength);
                     results.Add(new SearchResult(chapter, matches, score, snippet));
@@ -94,11 +92,10 @@ public sealed class SearchService
     /// </summary>
     public IEnumerable<SearchResult> SearchAny(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null)
     {
-        if (book == null)
-            throw new ArgumentNullException(nameof(book));
+        ArgumentNullException.ThrowIfNull(book);
 
         var terms = searchTerms?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
-        if (terms == null || !terms.Any())
+        if (terms == null || terms.Count == 0)
             return Enumerable.Empty<SearchResult>();
 
         options ??= new SearchOptions();
@@ -134,8 +131,7 @@ public sealed class SearchService
     /// </summary>
     public IEnumerable<SearchResult> SearchRegex(Book book, string pattern, SearchOptions? options = null)
     {
-        if (book == null)
-            throw new ArgumentNullException(nameof(book));
+        ArgumentNullException.ThrowIfNull(book);
 
         if (string.IsNullOrWhiteSpace(pattern))
             return Enumerable.Empty<SearchResult>();
@@ -183,7 +179,7 @@ public sealed class SearchService
         var plainText = _contentProcessor.ExtractPlainText(chapter.Content);
         var matches = FindMatches(plainText, searchTerm, options);
 
-        if (matches.Any())
+        if (matches.Count != 0)
         {
             var snippet = _contentProcessor.ExtractSnippet(chapter.Content, searchTerm, options.SnippetLength);
             yield return new SearchResult(chapter, matches, matches.Count, snippet);
@@ -259,7 +255,7 @@ public sealed class SearchResult
     public SearchResult(Chapter chapter, IEnumerable<SearchMatch> matches, int score, string snippet)
     {
         Chapter = chapter ?? throw new ArgumentNullException(nameof(chapter));
-        Matches = matches?.ToList() ?? new List<SearchMatch>();
+        Matches = matches?.ToList() ?? [];
         Score = score;
         Snippet = snippet ?? string.Empty;
     }

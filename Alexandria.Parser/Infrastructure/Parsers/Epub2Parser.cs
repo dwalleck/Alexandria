@@ -120,7 +120,7 @@ public sealed class Epub2Parser : IEpubParser
         var metadata = package.Metadata!;
 
         // Extract titles
-        var titles = metadata.Titles?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList() ?? new List<string>();
+        var titles = metadata.Titles?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList() ?? [];
         if (titles.Count == 0)
             throw new InvalidEpubStructureException("No title found in metadata", "content.opf");
 
@@ -131,13 +131,13 @@ public sealed class Epub2Parser : IEpubParser
         var authors = metadata.Authors?
             .Where(a => a?.Name != null)
             .Select(a => new Author(a.Name!, a.Role, a.FileAs))
-            .ToList() ?? new List<Author> { new Author("Unknown") };
+            .ToList() ?? [new Author("Unknown")];
 
         // Extract identifiers
         var identifiers = metadata.Identifiers?
             .Where(i => i?.Value != null && i.Scheme != null)
             .Select(i => new BookIdentifier(i.Value!, i.Scheme!))
-            .ToList() ?? new List<BookIdentifier>();
+            .ToList() ?? [];
 
         // Extract language
         var languageCode = metadata.Languages?.FirstOrDefault() ?? "en";
@@ -176,7 +176,7 @@ public sealed class Epub2Parser : IEpubParser
         var chapters = new List<Chapter>();
         var manifestMap = package.ManifestItems?
             .Where(m => m.Id != null)
-            .ToDictionary(m => m.Id!, m => m) ?? new Dictionary<string, ManifestItemXml>();
+            .ToDictionary(m => m.Id!, m => m) ?? [];
 
         if (package.SpineItemRefs == null || package.SpineItemRefs.Length == 0)
         {

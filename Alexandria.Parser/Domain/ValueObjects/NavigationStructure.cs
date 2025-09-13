@@ -130,7 +130,7 @@ public sealed class NavigationStructure
     private List<NavigationItem>? GetPathToItemRecursive(NavigationItem current, string targetId)
     {
         if (current.Id == targetId)
-            return new List<NavigationItem> { current };
+            return [current];
 
         foreach (var child in current.Children)
         {

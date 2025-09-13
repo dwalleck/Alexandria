@@ -54,17 +54,57 @@ dotnet restore
 
 ## Architecture
 
+### Target Architecture (Vertical Slice + DDD)
+
+**We are migrating to a Vertical Slice Architecture with Domain-Driven Design**. New features should follow this pattern:
+
+#### Feature Organization (Vertical Slices)
+```
+Features/
+├── [FeatureName]/
+│   ├── [Feature]Command.cs     # Input contract
+│   ├── [Feature]Handler.cs     # Business logic orchestration
+│   ├── [Feature]Validator.cs   # Input validation
+│   └── [Feature]Result.cs      # Output contract
+```
+
+#### Domain Layer Rules
+- **Rich Domain Models**: Entities contain business logic, not just data
+- **Domain Services**: For cross-entity operations (e.g., `IContentAnalyzer`)
+- **Value Objects**: Immutable objects representing concepts (e.g., `BookMetadata`, `ContentMetrics`)
+- **No Infrastructure Dependencies**: Domain layer should be pure business logic
+
+#### Content Processing
+**ALL content analysis (word count, reading time, HTML processing) must go through the `IContentAnalyzer` domain service**. Do not add these calculations to entities directly.
+
+Example:
+```csharp
+// WRONG - Don't add content processing to entities
+public class Chapter
+{
+    public int GetWordCount() { /* DON'T DO THIS */ }
+}
+
+// RIGHT - Use domain service
+public interface IContentAnalyzer
+{
+    ContentMetrics AnalyzeChapter(Chapter chapter);
+}
+```
+
+### Current Architecture (Being Phased Out)
+
 ### EPUB Parsing Flow
 1. **Entry Point**: `Parser.OpenBookAsync()` accepts a file path to an EPUB file
 2. **Container Processing**: Reads `META-INF/container.xml` to locate the content.opf file
 3. **Package Processing**: Deserializes content.opf to extract metadata, manifest, and spine
 4. **Content Extraction**: Reads individual chapter files from the manifest and returns a `Book` object
 
-### Key Components
+### Legacy Components (To Be Refactored)
 - **Parser**: Static class containing the main parsing logic using ZipArchive for EPUB extraction
-- **Models/Book**: Simple data structure containing titles, authors, and chapters as string lists
+- **Models/Book**: Simple data structure (DEPRECATED - use Domain.Entities.Book)
 - **Models/Container**: XML-serializable model for container.xml
-- **Models/Content/Package**: XML-serializable model for content.opf including Metadata, ManifestItem, SpineItemRef, and GuideReference
+- **Models/Content/Package**: XML-serializable model for content.opf
 
 ### XML Deserialization Strategy
 The codebase uses `System.Xml.Serialization` with strongly-typed models decorated with XML attributes to parse EPUB metadata files. Each EPUB structure component has a corresponding C# model class.
@@ -104,3 +144,31 @@ The codebase uses `System.Xml.Serialization` with strongly-typed models decorate
 ### When Adding New Projects
 - Always add new projects to the solution file using `dotnet sln add`
 - Maintain consistent project structure and naming conventions
+
+## Architectural Guidelines
+
+### When Adding New Features
+1. **Create a new feature slice** in the `Features/` folder
+2. **Use MediatR pattern**: Command/Query → Handler → Result
+3. **Keep domain logic pure**: No infrastructure dependencies in domain layer
+4. **Use domain services** for cross-cutting concerns (e.g., content analysis)
+5. **Avoid duplication**: Check if functionality already exists before creating new implementations
+
+### Code Organization Principles
+- **Vertical Slices over Layers**: Organize by feature, not by technical concern
+- **Domain at the Center**: Dependencies point inward toward the domain
+- **Single Source of Truth**: One implementation for each business capability
+- **Explicit over Implicit**: Clear contracts and boundaries between components
+
+### Migration Notes
+- **Legacy code exists**: Some older patterns are being phased out
+- **Incremental migration**: New features use new architecture, old features migrate gradually
+- **Preserve compatibility**: External APIs remain stable during migration
+- **Use Domain.Entities.Book**: The `Models.Book` class is deprecated
+
+### Anti-patterns to Avoid
+- ❌ Adding content processing logic directly to entities
+- ❌ Creating duplicate implementations of the same functionality
+- ❌ Mixing infrastructure concerns with domain logic
+- ❌ Using the legacy `Models.Book` class
+- ❌ Scattering business logic across multiple service classes
