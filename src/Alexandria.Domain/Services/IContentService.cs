@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+
+using Alexandria.Domain.Entities;
+using Alexandria.Domain.ValueObjects;
+
+namespace Alexandria.Domain.Services;
+
+public interface IContentService
+{
+    IEnumerable<SearchResult> Search(Book book, string searchTerm, SearchOptions? options = null);
+    IEnumerable<SearchResult> SearchAll(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null);
+    IEnumerable<SearchResult> SearchAny(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null);
+    string GetChapterPlainText(Chapter chapter);
+    string GetFullPlainText(Book book);
+    string GetPreview(Book book, int maxLength = 500);
+    ReadingStatistics GetReadingStatistics(Book book, int wordsPerMinute = 250);
+    IEnumerable<Chapter> FindChaptersWithTerm(Book book, string term);
+}
