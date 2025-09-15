@@ -1,9 +1,11 @@
+using MediatR;
+
 namespace Alexandria.Application.Features.LoadBook;
 
 /// <summary>
 /// Command to load a book from a file
 /// </summary>
-public sealed record LoadBookCommand
+public sealed record LoadBookCommand : IRequest<LoadBookResult>
 {
     public LoadBookCommand(string filePath)
     {

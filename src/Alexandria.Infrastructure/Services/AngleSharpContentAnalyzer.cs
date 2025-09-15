@@ -1,12 +1,7 @@
-using System;
 using System.Buffers;
 using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Alexandria.Domain.Services;
 using Alexandria.Domain.ValueObjects;
 using AngleSharp;
@@ -270,7 +265,8 @@ public sealed class AngleSharpContentAnalyzer : IContentAnalyzer
             element.Remove();
         }
 
-        var textContent = document.Body?.TextContent ?? string.Empty;
+        // For XHTML documents, Body might be null - use DocumentElement instead
+        var textContent = document.Body?.TextContent ?? document.DocumentElement?.TextContent ?? string.Empty;
 
         // Use span-based normalization to avoid allocations
         return NormalizeWhitespaceOptimized(textContent.AsSpan());

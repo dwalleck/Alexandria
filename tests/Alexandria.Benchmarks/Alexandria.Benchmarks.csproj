@@ -12,8 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Alexandria.Application\Alexandria.Application.csproj" />
     <ProjectReference Include="..\..\src\Alexandria.Domain\Alexandria.Domain.csproj" />
     <ProjectReference Include="..\..\src\Alexandria.Infrastructure\Alexandria.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Alexandria.Infrastructure.Tests\sample-epubs\**\*">
+      <Link>sample-epubs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

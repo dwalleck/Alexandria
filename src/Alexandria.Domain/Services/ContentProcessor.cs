@@ -38,8 +38,12 @@ public sealed class ContentProcessor
         // Remove remaining HTML tags
         text = HtmlTagRegex.Replace(text, " ");
 
-        // Normalize whitespace
-        text = WhitespaceRegex.Replace(text, " ");
+        // Normalize whitespace (but preserve line breaks)
+        // First, normalize spaces within lines
+        text = Regex.Replace(text, @"[^\S\n]+", " ");
+
+        // Then clean up spaces around line breaks
+        text = Regex.Replace(text, @" *\n *", "\n");
 
         // Clean up extra line breaks
         text = Regex.Replace(text, @"\n{3,}", "\n\n");

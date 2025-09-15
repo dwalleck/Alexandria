@@ -594,6 +594,7 @@ Add to `Alexandria.Infrastructure.csproj`:
 #### Performance Anti-Patterns to Avoid
 
 ❌ **DON'T**:
+
 - Use `string.Split()` for word counting
 - Create intermediate string arrays
 - Use regex for simple character operations
@@ -601,6 +602,7 @@ Add to `Alexandria.Infrastructure.csproj`:
 - Parse HTML multiple times
 
 ✅ **DO**:
+
 - Use `ReadOnlySpan<char>` for text processing
 - Reuse buffers from ArrayPool
 - Stack allocate small buffers
@@ -1872,6 +1874,7 @@ jobs:
 ### Phase 1: Regex to AngleSharp Migration
 
 #### Pre-Migration Checklist
+
 - [ ] Backup existing ContentProcessor implementation
 - [ ] Document current regex patterns and their purposes
 - [ ] Create comprehensive test suite for content extraction
@@ -1880,6 +1883,7 @@ jobs:
 #### Migration Steps
 
 1. **Create Parallel Implementation**
+
    ```csharp
    public interface IContentProcessor
    {
@@ -1891,6 +1895,7 @@ jobs:
    ```
 
 2. **Add Feature Toggle**
+
    ```csharp
    public class ContentProcessorFactory
    {
@@ -1904,6 +1909,7 @@ jobs:
    ```
 
 3. **Parallel Testing**
+
    ```csharp
    [Test]
    public void CompareProcessors()
@@ -1924,6 +1930,7 @@ jobs:
    - Week 3: 100% with ability to rollback
 
 #### Post-Migration Validation
+
 - [ ] Performance metrics match or exceed baseline
 - [ ] Memory usage reduced by at least 20%
 - [ ] All unit tests pass
@@ -1932,6 +1939,7 @@ jobs:
 ### Data Migration for Metadata
 
 #### Migration Script
+
 ```csharp
 public class MetadataMigration
 {
@@ -1965,6 +1973,7 @@ public class MetadataMigration
 ### Performance Checklist for PRs
 
 #### Required for All PRs
+
 - [ ] No regex for simple text operations
 - [ ] Spans used for string manipulation
 - [ ] ArrayPool used for buffers > 4KB
@@ -1973,12 +1982,14 @@ public class MetadataMigration
 - [ ] ValueTask used for cache scenarios
 
 #### Required for Feature PRs
+
 - [ ] Benchmark results included
 - [ ] Memory profiler output attached
 - [ ] Performance tests added
 - [ ] Load test results (if applicable)
 
 #### Review Template
+
 ```markdown
 ## Performance Review
 

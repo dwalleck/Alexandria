@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 using System.Text.RegularExpressions;
+using Alexandria.Domain.ValueObjects;
 
 namespace Alexandria.Domain.Entities;
 
@@ -35,6 +32,11 @@ public sealed class Chapter
     public string Content { get; }
     public int Order { get; }
     public string? Href { get; }
+
+    /// <summary>
+    /// Content analysis metrics for this chapter
+    /// </summary>
+    public ContentMetrics? Metrics { get; private set; }
 
     /// <summary>
     /// Gets the content as a memory span for efficient processing
@@ -75,5 +77,13 @@ public sealed class Chapter
         var wordCount = GetWordCount();
         var minutes = Math.Max(1, (int)Math.Ceiling(wordCount / (double)wordsPerMinute));
         return TimeSpan.FromMinutes(minutes);
+    }
+
+    /// <summary>
+    /// Sets the content metrics for this chapter
+    /// </summary>
+    public void SetMetrics(ContentMetrics metrics)
+    {
+        Metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
     }
 }

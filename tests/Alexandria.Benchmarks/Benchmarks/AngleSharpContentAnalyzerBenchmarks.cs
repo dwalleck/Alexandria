@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using Alexandria.Infrastructure.Services;
 using BenchmarkDotNet.Attributes;

@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Alexandria.Domain.Common;
 using Alexandria.Domain.Entities;
-using Alexandria.Domain.ValueObjects;
 
 namespace Alexandria.Domain.Repositories;
 

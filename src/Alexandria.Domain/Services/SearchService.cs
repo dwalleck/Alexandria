@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Alexandria.Domain.Entities;
-using Alexandria.Domain.ValueObjects;
 
 namespace Alexandria.Domain.Services;
 

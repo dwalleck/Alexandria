@@ -1,8 +1,4 @@
-using System;
-using System.Threading.Tasks;
 using Alexandria.Infrastructure.Services;
-using TUnit.Assertions;
-using TUnit.Core;
 
 namespace Alexandria.Infrastructure.Tests.Services;
 
@@ -314,5 +310,59 @@ Third paragraph.";
 
         // Assert
         await Assert.That(result).IsEqualTo("Test content");
+    }
+
+    [Test]
+    public async Task AnalyzeContentAsync_WithXhtmlContent_ExtractsTextCorrectly()
+    {
+        // Arrange
+        const string xhtmlContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<!DOCTYPE html PUBLIC ""-//W3C//DTD XHTML 1.1//EN"" ""http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"">
+<html xmlns=""http://www.w3.org/1999/xhtml"">
+<head>
+    <title>Test Page</title>
+</head>
+<body class=""x-ebookmaker x-ebookmaker-3"">
+    <p>This is a test paragraph with some content.</p>
+    <p>This is another paragraph.</p>
+</body>
+</html>";
+
+        // Act
+        var metrics = await _analyzer.AnalyzeContentAsync(xhtmlContent);
+
+        // Assert
+        await Assert.That(metrics.WordCount).IsGreaterThan(0);
+        await Assert.That(metrics.CharacterCount).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task AnalyzeContentAsync_WithEpubXhtmlContent_ExtractsTextCorrectly()
+    {
+        // Arrange - Using actual EPUB XHTML structure from Moby Dick
+        const string epubXhtmlContent = @"<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'>
+<html xmlns=""http://www.w3.org/1999/xhtml"">
+<head>
+<meta http-equiv=""Content-Type"" content=""text/html; charset=UTF-8""/>
+<title>The Project Gutenberg eBook of Moby Dick; Or, The Whale, by Herman Melville</title>
+</head>
+<body class=""x-ebookmaker x-ebookmaker-3"">
+<div class=""pgebub-root-div pgheader"" id=""pg-header-heading"">
+<h1>MOBY-DICK;<br/>or, THE WHALE.</h1>
+<p>By Herman Melville</p>
+</div>
+<p>Call me Ishmael. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.</p>
+</body>
+</html>";
+
+        // Act
+        var metrics = await _analyzer.AnalyzeContentAsync(epubXhtmlContent);
+
+        // Assert
+        await Assert.That(metrics.WordCount).IsGreaterThan(0, "Expected word count to be greater than 0");
+        await Assert.That(metrics.CharacterCount).IsGreaterThan(0, "Expected character count to be greater than 0");
+        // Should contain at least the famous opening line
+        await Assert.That(metrics.WordCount).IsGreaterThanOrEqualTo(30, "Should contain at least 30 words from the content");
     }
 }

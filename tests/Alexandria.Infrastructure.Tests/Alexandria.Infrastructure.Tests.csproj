@@ -9,11 +9,17 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
-    <PackageReference Include="TUnit" Version="0.57.1" />
+    <PackageReference Include="TUnit" Version="0.57.65" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Alexandria.Infrastructure\Alexandria.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="sample-epubs\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

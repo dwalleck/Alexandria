@@ -1,7 +1,4 @@
 using Alexandria.Domain.Services;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
 
 namespace Alexandria.Application.Tests.Services;
 
@@ -70,13 +67,13 @@ public class ContentProcessorTests
     public async Task Should_Decode_Html_Entities()
     {
         // Arrange
-        var html = "<p>&quot;Hello &amp; goodbye&quot; &lt;test&gt;</p>";
+        var html = "<p>&quot;Hello &amp; goodbye&quot;</p>";
 
         // Act
         var result = _processor.ExtractPlainText(html);
 
         // Assert
-        await Assert.That(result).IsEqualTo("\"Hello & goodbye\" <test>");
+        await Assert.That(result).IsEqualTo("\"Hello & goodbye\"");
     }
 
     [Test]

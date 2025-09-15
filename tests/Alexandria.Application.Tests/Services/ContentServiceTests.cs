@@ -1,11 +1,7 @@
-using System.Text;
 using Alexandria.Application.Services;
 using Alexandria.Domain.Entities;
 using Alexandria.Domain.Services;
 using Alexandria.Domain.ValueObjects;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
 
 namespace Alexandria.Application.Tests.Services;
 

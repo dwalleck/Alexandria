@@ -1,6 +1,5 @@
 using Alexandria.Domain.Entities;
 using Alexandria.Domain.Errors;
-using Alexandria.Domain.Exceptions;
 using Alexandria.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using OneOf;

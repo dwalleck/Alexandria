@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Text;
-using System.Xml;
 
 namespace Alexandria.Domain.Tests.Utilities;
 
