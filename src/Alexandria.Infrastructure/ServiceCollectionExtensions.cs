@@ -21,8 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEpubParser, AdaptiveEpubParser>();
         services.AddScoped<EpubVersionDetector>();
 
-        // Repository services
-        services.AddScoped<IBookRepository, BookRepository>();
+        // Loader services
+        services.AddScoped<IEpubLoader, EpubLoader>();
 
         // Application services
         services.AddScoped<ILoadBookHandler, LoadBookHandler>();

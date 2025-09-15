@@ -1,13 +1,20 @@
-using Alexandria.Parser.Domain.Entities;
-using Alexandria.Parser.Domain.Errors;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+using System.IO;
+using System.Threading;
+using Alexandria.Domain.Entities;
+using Alexandria.Domain.Errors;
 using OneOf;
 
-namespace Alexandria.Parser.Domain.Interfaces;
+namespace Alexandria.Domain.Interfaces;
 
 /// <summary>
-/// Repository interface for loading books from various sources using OneOf
+/// Interface for loading EPUB books from various sources using OneOf
 /// </summary>
-public interface IBookRepository
+public interface IEpubLoader
 {
     /// <summary>
     /// Loads a book from a file path

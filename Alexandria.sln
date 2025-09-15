@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alexandria.Infrastructure.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alexandria.Benchmarks", "tests\Alexandria.Benchmarks\Alexandria.Benchmarks.csproj", "{741662BF-E117-494D-92CD-763A513059AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alexandria.Repositories.Tests", "tests\Alexandria.Repositories.Tests\Alexandria.Repositories.Tests.csproj", "{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -241,6 +243,26 @@ Global
 		{741662BF-E117-494D-92CD-763A513059AF}.Release|x64.Build.0 = Release|Any CPU
 		{741662BF-E117-494D-92CD-763A513059AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{741662BF-E117-494D-92CD-763A513059AF}.Release|x86.Build.0 = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|ARM.Build.0 = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|x64.Build.0 = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Debug|x86.Build.0 = Debug|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|ARM.ActiveCfg = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|ARM.Build.0 = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|ARM64.Build.0 = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|x64.ActiveCfg = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|x64.Build.0 = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|x86.ActiveCfg = Release|Any CPU
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -255,6 +277,7 @@ Global
 		{C8C1B23F-20E3-434F-BF59-83EF90C93654} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{7C0A0E35-A552-4A0F-87FF-4D412698D436} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{741662BF-E117-494D-92CD-763A513059AF} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{DEA13714-3BBC-448C-9F81-D1BE32ADDE04} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A19CEFDB-1C1E-4095-A5F7-5A1B228174AB}

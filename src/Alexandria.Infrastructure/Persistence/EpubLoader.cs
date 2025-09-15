@@ -8,14 +8,14 @@ using OneOf;
 namespace Alexandria.Infrastructure.Repositories;
 
 /// <summary>
-/// Repository implementation for loading books from various sources
+/// Implementation for loading EPUB books from various sources
 /// </summary>
-public sealed class BookRepository : IBookRepository
+public sealed class EpubLoader : IEpubLoader
 {
     private readonly IEpubParser _epubParser;
-    private readonly ILogger<BookRepository> _logger;
+    private readonly ILogger<EpubLoader> _logger;
 
-    public BookRepository(IEpubParser epubParser, ILogger<BookRepository> logger)
+    public EpubLoader(IEpubParser epubParser, ILogger<EpubLoader> logger)
     {
         _epubParser = epubParser ?? throw new ArgumentNullException(nameof(epubParser));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
