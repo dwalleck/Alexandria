@@ -1,0 +1,176 @@
+name: Update Blocked Issues
+
+on:
+  issues:
+    types: [closed]
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  update-blocked:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update Blocked Issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const closedIssue = context.payload.issue;
+            console.log(`Issue #${closedIssue.number} was closed. Checking for dependent issues...`);
+
+            // Search for all open issues with the 'blocked' label
+            const { data: blockedIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'blocked',
+              per_page: 100
+            });
+
+            console.log(`Found ${blockedIssues.length} blocked issues to check`);
+
+            for (const issue of blockedIssues) {
+              console.log(`\nChecking issue #${issue.number}: ${issue.title}`);
+
+              // Check if this issue mentions the closed issue as a blocker
+              if (!issue.body || !issue.body.includes(`#${closedIssue.number}`)) {
+                console.log(`  - Not blocked by #${closedIssue.number}, skipping`);
+                continue;
+              }
+
+              console.log(`  - Is blocked by #${closedIssue.number}`);
+
+              // Extract all blocker issue numbers from the "Blocked By" section
+              const blockedByRegex = /Blocked By:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
+              const blockedBySection = issue.body.match(blockedByRegex);
+
+              if (!blockedBySection) {
+                console.log(`  - No 'Blocked By' section found`);
+                continue;
+              }
+
+              // Extract issue numbers from the blocked by section
+              const issueNumberRegex = /#(\d+)/g;
+              const blockerNumbers = [];
+              let match;
+
+              while ((match = issueNumberRegex.exec(blockedBySection[0])) !== null) {
+                blockerNumbers.push(parseInt(match[1]));
+              }
+
+              console.log(`  - Found blockers: #${blockerNumbers.join(', #')}`);
+
+              // Check if all blockers are closed
+              let allBlockersClosed = true;
+              let openBlockers = [];
+
+              for (const blockerNum of blockerNumbers) {
+                try {
+                  const { data: blocker } = await github.rest.issues.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: blockerNum
+                  });
+
+                  if (blocker.state === 'open') {
+                    allBlockersClosed = false;
+                    openBlockers.push(blockerNum);
+                    console.log(`  - Blocker #${blockerNum} is still open`);
+                  } else {
+                    console.log(`  - Blocker #${blockerNum} is closed ✓`);
+                  }
+                } catch (error) {
+                  console.log(`  - Could not check blocker #${blockerNum}: ${error.message}`);
+                  // If we can't check a blocker, assume it's still blocking
+                  allBlockersClosed = false;
+                  openBlockers.push(blockerNum);
+                }
+              }
+
+              if (allBlockersClosed && blockerNumbers.length > 0) {
+                console.log(`  ✅ All blockers resolved! Updating issue #${issue.number}...`);
+
+                try {
+                  // Remove 'blocked' label
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    name: 'blocked'
+                  }).catch(err => console.log(`Could not remove 'blocked' label: ${err.message}`));
+
+                  // Add 'ready' label
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    labels: ['ready']
+                  });
+
+                  // Add a comment
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `✅ All blocking issues have been resolved! This issue is now ready to work on.\n\nPreviously blocked by: ${blockerNumbers.map(n => `#${n}`).join(', ')}`
+                  });
+
+                  console.log(`  ✅ Successfully updated issue #${issue.number}`);
+                } catch (error) {
+                  console.error(`  ❌ Error updating issue #${issue.number}: ${error.message}`);
+                }
+              } else if (!allBlockersClosed) {
+                console.log(`  - Still blocked by: #${openBlockers.join(', #')}`);
+              }
+            }
+
+            console.log('\n✅ Finished checking all blocked issues');
+
+  check-ready-phase-transitions:
+    runs-on: ubuntu-latest
+    needs: update-blocked
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Check Phase Transitions
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Check if entire phases can be marked as ready
+            const milestones = [
+              'Phase 2: Backend Completion',
+              'Phase 3: Frontend Foundation',
+              'Phase 4: Library Management',
+              'Phase 5: Reading Experience',
+              'Phase 6: Polish & Optimization',
+              'Phase 7: Advanced Features'
+            ];
+
+            for (const milestone of milestones) {
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                milestone: milestone,
+                state: 'open',
+                per_page: 100
+              });
+
+              const blockedCount = issues.filter(i =>
+                i.labels.some(l => l.name === 'blocked')
+              ).length;
+
+              if (blockedCount === 0 && issues.length > 0) {
+                console.log(`📋 ${milestone}: All ${issues.length} issues are unblocked and ready!`);
+              } else if (blockedCount > 0) {
+                console.log(`⏳ ${milestone}: ${blockedCount}/${issues.length} issues still blocked`);
+              }
+            }

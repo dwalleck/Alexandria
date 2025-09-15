@@ -1,0 +1,160 @@
+name: Check All Blocked Issues
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-all-blocked:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Check and Update All Blocked Issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('🔍 Starting comprehensive blocked issue check...\n');
+
+            // Get all open issues with 'blocked' label
+            const { data: blockedIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'blocked',
+              per_page: 100
+            });
+
+            console.log(`Found ${blockedIssues.length} blocked issues to check\n`);
+
+            let updatedCount = 0;
+            let stillBlockedCount = 0;
+
+            for (const issue of blockedIssues) {
+              console.log(`Checking issue #${issue.number}: ${issue.title}`);
+
+              // Extract blocker issue numbers
+              const blockedByRegex = /Blocked By:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
+              const blockedBySection = issue.body ? issue.body.match(blockedByRegex) : null;
+
+              if (!blockedBySection) {
+                console.log(`  - No 'Blocked By' section found, skipping\n`);
+                continue;
+              }
+
+              // Extract issue numbers
+              const issueNumberRegex = /#(\d+)/g;
+              const blockerNumbers = [];
+              let match;
+
+              while ((match = issueNumberRegex.exec(blockedBySection[0])) !== null) {
+                blockerNumbers.push(parseInt(match[1]));
+              }
+
+              if (blockerNumbers.length === 0) {
+                console.log(`  - No blocker issues found in 'Blocked By' section\n`);
+                continue;
+              }
+
+              console.log(`  - Checking blockers: #${blockerNumbers.join(', #')}`);
+
+              // Check status of all blockers
+              let allBlockersClosed = true;
+              let openBlockers = [];
+              let closedBlockers = [];
+
+              for (const blockerNum of blockerNumbers) {
+                try {
+                  const { data: blocker } = await github.rest.issues.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: blockerNum
+                  });
+
+                  if (blocker.state === 'open') {
+                    allBlockersClosed = false;
+                    openBlockers.push(blockerNum);
+                  } else {
+                    closedBlockers.push(blockerNum);
+                  }
+                } catch (error) {
+                  console.log(`  - Warning: Could not check blocker #${blockerNum}`);
+                  allBlockersClosed = false;
+                  openBlockers.push(blockerNum);
+                }
+              }
+
+              if (allBlockersClosed) {
+                console.log(`  ✅ All blockers resolved! Updating to ready...`);
+
+                try {
+                  // Remove 'blocked' label
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    name: 'blocked'
+                  }).catch(() => {});
+
+                  // Add 'ready' label
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    labels: ['ready']
+                  });
+
+                  // Add comment
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `✅ Automated check: All blocking issues have been resolved!\n\nThis issue is now ready to work on.\n\n_This check runs daily to ensure blocked issues are updated when their dependencies are resolved._`
+                  });
+
+                  updatedCount++;
+                  console.log(`  ✅ Successfully updated issue #${issue.number}\n`);
+                } catch (error) {
+                  console.error(`  ❌ Error updating issue #${issue.number}: ${error.message}\n`);
+                }
+              } else {
+                stillBlockedCount++;
+                console.log(`  ⏳ Still blocked by: #${openBlockers.join(', #')}`);
+                if (closedBlockers.length > 0) {
+                  console.log(`  ✓ Resolved blockers: #${closedBlockers.join(', #')}`);
+                }
+                console.log('');
+              }
+            }
+
+            // Summary
+            console.log('📊 Summary:');
+            console.log(`  - ${updatedCount} issues updated to ready`);
+            console.log(`  - ${stillBlockedCount} issues remain blocked`);
+            console.log(`  - ${blockedIssues.length - updatedCount - stillBlockedCount} issues skipped (no valid blockers)`);
+
+            // Check for issues that might be ready but not labeled
+            const { data: unlabeledIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            const issuesWithoutStatus = unlabeledIssues.filter(i =>
+              !i.labels.some(l => ['ready', 'blocked', 'in-progress'].includes(l.name))
+            );
+
+            if (issuesWithoutStatus.length > 0) {
+              console.log(`\n⚠️ Found ${issuesWithoutStatus.length} issues without status labels:`);
+              issuesWithoutStatus.forEach(i => {
+                console.log(`  - #${i.number}: ${i.title}`);
+              });
+            }
+
+            console.log('\n✅ Comprehensive check complete!');
