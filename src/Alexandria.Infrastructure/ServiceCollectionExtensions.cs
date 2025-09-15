@@ -1,7 +1,9 @@
 using Alexandria.Application.Features.LoadBook;
 using Alexandria.Domain.Interfaces;
+using Alexandria.Domain.Services;
 using Alexandria.Infrastructure.Parsers;
 using Alexandria.Infrastructure.Repositories;
+using Alexandria.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Alexandria.Infrastructure;
@@ -16,6 +18,9 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddAlexandriaParser(this IServiceCollection services)
     {
+        // Domain services
+        services.AddSingleton<IContentAnalyzer, AngleSharpContentAnalyzer>();
+
         // Parser services
         services.AddSingleton<IEpubParserFactory, EpubParserFactory>();
         services.AddScoped<IEpubParser, AdaptiveEpubParser>();
