@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Alexandria.Domain\Alexandria.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Alexandria.Infrastructure\Alexandria.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
