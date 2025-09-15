@@ -16,7 +16,7 @@ namespace Alexandria.Infrastructure;
 public sealed class EpubReader
 {
     private readonly ILoadBookHandler _loadBookHandler;
-    private readonly IBookRepository _bookRepository;
+    private readonly IEpubLoader _epubLoader;
 
     /// <summary>
     /// Creates a new EPUB reader with default configuration
@@ -34,8 +34,8 @@ public sealed class EpubReader
 
         var parserFactory = new EpubParserFactory(loggerFactory);
         var adaptiveParser = new AdaptiveEpubParser(parserFactory, loggerFactory.CreateLogger<AdaptiveEpubParser>());
-        _bookRepository = new BookRepository(adaptiveParser, loggerFactory.CreateLogger<BookRepository>());
-        _loadBookHandler = new LoadBookHandler(_bookRepository, loggerFactory.CreateLogger<LoadBookHandler>());
+        _epubLoader = new EpubLoader(adaptiveParser, loggerFactory.CreateLogger<EpubLoader>());
+        _loadBookHandler = new LoadBookHandler(_epubLoader, loggerFactory.CreateLogger<LoadBookHandler>());
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public sealed class EpubReader
     /// </summary>
     public async Task<Book> LoadBookAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        var result = await _bookRepository.LoadFromStreamAsync(stream, cancellationToken);
+        var result = await _epubLoader.LoadFromStreamAsync(stream, cancellationToken);
 
         return result.Match<Book>(
             book => book,
@@ -70,7 +70,7 @@ public sealed class EpubReader
     /// </summary>
     public async Task<Book> LoadBookAsync(byte[] bytes, CancellationToken cancellationToken = default)
     {
-        var result = await _bookRepository.LoadFromBytesAsync(bytes, cancellationToken);
+        var result = await _epubLoader.LoadFromBytesAsync(bytes, cancellationToken);
 
         return result.Match<Book>(
             book => book,
@@ -83,7 +83,7 @@ public sealed class EpubReader
     /// </summary>
     public async Task<bool> ValidateAsync(string filePath, CancellationToken cancellationToken = default)
     {
-        var result = await _bookRepository.ValidateEpubAsync(filePath, cancellationToken);
+        var result = await _epubLoader.ValidateEpubAsync(filePath, cancellationToken);
 
         return result.Match(
             success => true,

@@ -11,12 +11,12 @@ namespace Alexandria.Application.Features.LoadBook;
 /// </summary>
 public sealed class LoadBookHandler : ILoadBookHandler
 {
-    private readonly IBookRepository _bookRepository;
+    private readonly IEpubLoader _epubLoader;
     private readonly ILogger<LoadBookHandler> _logger;
 
-    public LoadBookHandler(IBookRepository bookRepository, ILogger<LoadBookHandler> logger)
+    public LoadBookHandler(IEpubLoader epubLoader, ILogger<LoadBookHandler> logger)
     {
-        _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
+        _epubLoader = epubLoader ?? throw new ArgumentNullException(nameof(epubLoader));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -31,7 +31,7 @@ public sealed class LoadBookHandler : ILoadBookHandler
         }
 
         // Validate the EPUB first
-        var validationResult = await _bookRepository.ValidateEpubAsync(command.FilePath, cancellationToken);
+        var validationResult = await _epubLoader.ValidateEpubAsync(command.FilePath, cancellationToken);
 
         if (validationResult.IsT1) // ValidationError
         {
@@ -41,7 +41,7 @@ public sealed class LoadBookHandler : ILoadBookHandler
         }
 
         // Load the book
-        var result = await _bookRepository.LoadFromFileAsync(command.FilePath, cancellationToken);
+        var result = await _epubLoader.LoadFromFileAsync(command.FilePath, cancellationToken);
 
         return result.Match<OneOf<Book, ParsingError>>(
             book =>
