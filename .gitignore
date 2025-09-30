@@ -431,3 +431,8 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Test output files
+test-output.txt
+full-test-output.txt
+*test-output*.txt

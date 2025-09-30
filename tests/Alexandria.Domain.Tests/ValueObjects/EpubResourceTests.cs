@@ -155,7 +155,7 @@ public class EpubResourceTests
 
             // Assert
             var savedContent = await File.ReadAllBytesAsync(tempFile);
-            await Assert.That(savedContent).IsEqualTo(content);
+            await Assert.That(savedContent).IsEquivalentTo(content);
         }
         finally
         {
@@ -177,7 +177,7 @@ public class EpubResourceTests
         await resource.SaveToStreamAsync(stream);
 
         // Assert
-        await Assert.That(stream.ToArray()).IsEqualTo(content);
+        await Assert.That(stream.ToArray()).IsEquivalentTo(content);
     }
 
     [Test]

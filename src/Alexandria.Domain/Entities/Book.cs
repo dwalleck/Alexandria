@@ -31,7 +31,7 @@ public sealed class Book
         Title = title ?? throw new ArgumentNullException(nameof(title));
         AlternateTitles = alternateTitles?.ToList() ?? [];
         _authors = authors?.ToList() ?? throw new ArgumentNullException(nameof(authors));
-        _chapters = chapters?.ToList() ?? throw new ArgumentNullException(nameof(chapters));
+        _chapters = chapters?.OrderBy(c => c.Order).ToList() ?? throw new ArgumentNullException(nameof(chapters));
         _identifiers = identifiers?.ToList() ?? throw new ArgumentNullException(nameof(identifiers));
         Language = language ?? throw new ArgumentNullException(nameof(language));
         Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
