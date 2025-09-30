@@ -147,10 +147,9 @@ public class BookPhase4MetadataTests
         var tags = book.GetTags();
 
         // Assert
-        await Assert.That(tags).HasCount().EqualTo(3); // fiction, adventure, plus Fiction from subject
+        await Assert.That(tags).HasCount().EqualTo(2); // fiction and adventure (Fiction subject is duplicate)
         await Assert.That(tags).Contains("fiction");
         await Assert.That(tags).Contains("adventure");
-        await Assert.That(tags).Contains("Fiction");
     }
 
     [Test]
