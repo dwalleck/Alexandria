@@ -38,8 +38,8 @@ jobs:
             for (const issue of blockedIssues) {
               console.log(`Checking issue #${issue.number}: ${issue.title}`);
 
-              // Extract blocker issue numbers
-              const blockedByRegex = /Blocked By:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
+              // Extract blocker issue numbers (handles markdown bold/italic)
+              const blockedByRegex = /\*{0,2}Blocked By\*{0,2}:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
               const blockedBySection = issue.body ? issue.body.match(blockedByRegex) : null;
 
               if (!blockedBySection) {
