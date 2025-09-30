@@ -57,11 +57,13 @@ public sealed class Chapter
     /// </summary>
     public int GetWordCount()
     {
-        // Strip HTML tags
-        var textOnly = Regex.Replace(Content, @"<[^>]+>", " ");
-        // Strip script and style content
+        var textOnly = Content;
+        // Strip head, script, and style content first (before removing tags)
+        textOnly = Regex.Replace(textOnly, @"<head[^>]*>[\s\S]*?</head>", " ", RegexOptions.IgnoreCase);
         textOnly = Regex.Replace(textOnly, @"<script[^>]*>[\s\S]*?</script>", " ", RegexOptions.IgnoreCase);
         textOnly = Regex.Replace(textOnly, @"<style[^>]*>[\s\S]*?</style>", " ", RegexOptions.IgnoreCase);
+        // Then strip remaining HTML tags
+        textOnly = Regex.Replace(textOnly, @"<[^>]+>", " ");
         // Decode HTML entities
         textOnly = System.Net.WebUtility.HtmlDecode(textOnly);
         // Split by whitespace and count non-empty strings
