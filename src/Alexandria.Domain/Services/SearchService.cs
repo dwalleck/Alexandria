@@ -43,7 +43,9 @@ public sealed class SearchService
     }
 
     /// <summary>
-    /// Searches for multiple terms (AND operation)
+    /// Searches for multiple terms (AND operation).
+    /// Defaults to whole-word matching when no options are provided to prevent partial matches.
+    /// Explicit options settings are respected.
     /// </summary>
     public IEnumerable<SearchResult> SearchAll(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null)
     {
@@ -53,22 +55,9 @@ public sealed class SearchService
         if (terms == null || terms.Count == 0)
             return Enumerable.Empty<SearchResult>();
 
-        // Default to whole-word matching for multi-term AND searches
-        if (options == null)
-        {
-            options = new SearchOptions { WholeWord = true };
-        }
-        else if (!options.WholeWord)
-        {
-            // Create new options with WholeWord enabled, preserving other settings
-            options = new SearchOptions
-            {
-                WholeWord = true,
-                CaseSensitive = options.CaseSensitive,
-                MaxMatchesPerChapter = options.MaxMatchesPerChapter,
-                SnippetLength = options.SnippetLength
-            };
-        }
+        // Default to whole-word matching for multi-term AND searches when no options provided
+        // This prevents partial matches (e.g., "fox" matching "foxes")
+        options ??= new SearchOptions { WholeWord = true };
 
         var results = new List<SearchResult>();
 
