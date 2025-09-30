@@ -146,7 +146,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Check if entire phases can be marked as ready
-            const milestones = [
+            const milestoneNames = [
               'Phase 2: Backend Completion',
               'Phase 3: Frontend Foundation',
               'Phase 4: Library Management',
@@ -155,11 +155,31 @@ jobs:
               'Phase 7: Advanced Features'
             ];
 
-            for (const milestone of milestones) {
+            // Fetch all milestones to get their numbers
+            const { data: allMilestones } = await github.rest.issues.listMilestones({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            // Create a map of milestone names to numbers
+            const milestoneMap = new Map(
+              allMilestones.map(m => [m.title, m.number])
+            );
+
+            for (const milestoneName of milestoneNames) {
+              const milestoneNumber = milestoneMap.get(milestoneName);
+
+              if (!milestoneNumber) {
+                console.log(`⚠️  ${milestoneName}: Milestone not found`);
+                continue;
+              }
+
               const { data: issues } = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                milestone: milestone,
+                milestone: milestoneNumber.toString(),
                 state: 'open',
                 per_page: 100
               });
@@ -169,8 +189,8 @@ jobs:
               ).length;
 
               if (blockedCount === 0 && issues.length > 0) {
-                console.log(`📋 ${milestone}: All ${issues.length} issues are unblocked and ready!`);
+                console.log(`📋 ${milestoneName}: All ${issues.length} issues are unblocked and ready!`);
               } else if (blockedCount > 0) {
-                console.log(`⏳ ${milestone}: ${blockedCount}/${issues.length} issues still blocked`);
+                console.log(`⏳ ${milestoneName}: ${blockedCount}/${issues.length} issues still blocked`);
               }
             }
