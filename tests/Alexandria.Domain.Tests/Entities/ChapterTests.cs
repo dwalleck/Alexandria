@@ -75,7 +75,7 @@ public class ChapterTests
         var wordCount = chapter.GetWordCount();
 
         // Assert
-        await Assert.That(wordCount).IsEqualTo(14); // "Chapter Title This is the first paragraph This is the second paragraph with more words"
+        await Assert.That(wordCount).IsEqualTo(15); // "Chapter Title This is the first paragraph This is the second paragraph with more words"
     }
 
     [Test]
