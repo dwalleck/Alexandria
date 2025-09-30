@@ -35,15 +35,30 @@ public class SearchServiceTests
     }
 
     [Test]
-    public async Task Should_Find_Search_Term_In_Chapters()
+    public async Task Should_Find_Search_Term_With_Whole_Word_By_Default()
     {
         // Arrange
         var book = CreateTestBook();
 
-        // Act
+        // Act - Default should be whole-word matching
         var results = _searchService.Search(book, "fox").ToList();
 
-        // Assert
+        // Assert - Only finds "fox", not "foxes"
+        await Assert.That(results).HasCount(1);
+        await Assert.That(results[0].Chapter.Id).IsEqualTo("ch1");
+    }
+
+    [Test]
+    public async Task Should_Find_Search_Term_With_Substring_When_Specified()
+    {
+        // Arrange
+        var book = CreateTestBook();
+        var options = new SearchOptions { WholeWord = false };
+
+        // Act - Substring matching enabled
+        var results = _searchService.Search(book, "fox", options).ToList();
+
+        // Assert - Finds both "fox" and "foxes"
         await Assert.That(results).HasCount(2);
         await Assert.That(results[0].Chapter.Id).IsEqualTo("ch1");
         await Assert.That(results[1].Chapter.Id).IsEqualTo("ch2");
@@ -71,8 +86,9 @@ public class SearchServiceTests
         // Act
         var results = _searchService.Search(book, "FOX").ToList();
 
-        // Assert
-        await Assert.That(results).HasCount(2);
+        // Assert - Case insensitive, finds "fox" but not "foxes" (whole-word by default)
+        await Assert.That(results).HasCount(1);
+        await Assert.That(results[0].Chapter.Id).IsEqualTo("ch1");
     }
 
     [Test]
@@ -133,17 +149,32 @@ public class SearchServiceTests
     }
 
     [Test]
-    public async Task Should_Search_Any_Terms_With_OR_Logic()
+    public async Task Should_Search_Any_Terms_With_OR_Logic_Whole_Word_Default()
     {
         // Arrange
         var book = CreateTestBook();
         var terms = new[] { "fox", "animals" };
 
-        // Act
+        // Act - Default whole-word matching
         var results = _searchService.SearchAny(book, terms).ToList();
 
-        // Assert
-        await Assert.That(results).HasCount(3); // ch1 and ch2 have "fox", ch3 has "animals"
+        // Assert - ch1 has "fox", ch3 has "animals" (ch2 has "foxes" which doesn't match whole-word)
+        await Assert.That(results).HasCount(2);
+    }
+
+    [Test]
+    public async Task Should_Search_Any_Terms_With_OR_Logic_Substring_When_Specified()
+    {
+        // Arrange
+        var book = CreateTestBook();
+        var terms = new[] { "fox", "animals" };
+        var options = new SearchOptions { WholeWord = false };
+
+        // Act - Substring matching enabled
+        var results = _searchService.SearchAny(book, terms, options).ToList();
+
+        // Assert - ch1 and ch2 have "fox"/"foxes", ch3 has "animals"
+        await Assert.That(results).HasCount(3);
     }
 
     [Test]
@@ -223,11 +254,13 @@ public class SearchServiceTests
     {
         // Arrange
         var book = CreateTestBook();
+        var options = new SearchOptions { WholeWord = false };
 
-        // Act
-        var results = _searchService.Search(book, "o").ToList(); // 'o' appears multiple times
+        // Act - Use substring matching to find 'o' appearing multiple times
+        var results = _searchService.Search(book, "o", options).ToList();
 
         // Assert
+        await Assert.That(results).HasCount().GreaterThan(0);
         await Assert.That(results[0].Score).IsGreaterThan(0);
     }
 

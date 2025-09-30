@@ -43,7 +43,7 @@ public sealed class SearchService
     }
 
     /// <summary>
-    /// Searches for multiple terms (AND operation)
+    /// Searches for multiple terms (AND operation).
     /// </summary>
     public IEnumerable<SearchResult> SearchAll(Book book, IEnumerable<string> searchTerms, SearchOptions? options = null)
     {
@@ -54,34 +54,33 @@ public sealed class SearchService
             return Enumerable.Empty<SearchResult>();
 
         options ??= new SearchOptions();
+
         var results = new List<SearchResult>();
 
         foreach (var chapter in book.Chapters)
         {
             var plainText = _contentProcessor.ExtractPlainText(chapter.Content);
 
-            // Check if all terms are present
-            var allTermsPresent = terms.All(term =>
-                plainText.Contains(term, options.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase));
+            // Find matches for each term and check if all terms have at least one match
+            var allMatches = new List<SearchMatch>();
+            var termMatchCounts = new Dictionary<string, int>();
+            var score = 0;
 
-            if (allTermsPresent)
+            foreach (var term in terms)
             {
-                // Calculate combined score
-                var score = 0;
-                var matches = new List<SearchMatch>();
+                var termMatches = FindMatches(plainText, term, options);
+                termMatchCounts[term] = termMatches.Count;
+                allMatches.AddRange(termMatches);
+                score += termMatches.Count;
+            }
 
-                foreach (var term in terms)
-                {
-                    var termMatches = FindMatches(plainText, term, options);
-                    matches.AddRange(termMatches);
-                    score += termMatches.Count;
-                }
+            // Only include result if ALL terms have at least one match
+            var allTermsMatched = termMatchCounts.Values.All(count => count > 0);
 
-                if (matches.Count != 0)
-                {
-                    var snippet = _contentProcessor.ExtractSnippet(chapter.Content, terms.First(), options.SnippetLength);
-                    results.Add(new SearchResult(chapter, matches, score, snippet));
-                }
+            if (allTermsMatched && allMatches.Count != 0)
+            {
+                var snippet = _contentProcessor.ExtractSnippet(chapter.Content, terms.First(), options.SnippetLength);
+                results.Add(new SearchResult(chapter, allMatches, score, snippet));
             }
         }
 
