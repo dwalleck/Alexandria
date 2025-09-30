@@ -42,12 +42,13 @@ public sealed class SearchMatch
 }
 
 /// <summary>
-/// Options for searching
+/// Options for searching.
+/// Defaults to whole-word matching for more precise results.
 /// </summary>
 public sealed class SearchOptions
 {
     public bool CaseSensitive { get; set; } = false;
-    public bool WholeWord { get; set; } = false;
+    public bool WholeWord { get; set; } = true;
     public int MaxMatchesPerChapter { get; set; } = 10;
     public int SnippetLength { get; set; } = 100;
 }
