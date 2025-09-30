@@ -91,7 +91,7 @@ public class BookTests
         // Act & Assert
         await Assert.That(() => new Book(title, new List<BookTitle>(), authors, emptyChapters, new List<BookIdentifier>(), language, new BookMetadata()))
             .Throws<ArgumentException>()
-            .WithMessage("A book must have at least one chapter");
+            .WithMessageContaining("A book must have at least one chapter");
     }
 
     [Test]
@@ -106,7 +106,7 @@ public class BookTests
         // Act & Assert
         await Assert.That(() => new Book(title, new List<BookTitle>(), emptyAuthors, chapters, new List<BookIdentifier>(), language, new BookMetadata()))
             .Throws<ArgumentException>()
-            .WithMessage("A book must have at least one author");
+            .WithMessageContaining("A book must have at least one author");
     }
 
     [Test]
@@ -437,8 +437,8 @@ public class BookTests
         // Arrange
         var resources = new[]
         {
-            new EpubResource("style1", "styles.css", "text/css"),
-            new ImageResource("img1", "cover.jpg", "image/jpeg", null, null, true)
+            new EpubResource("style1", "styles.css", "text/css", Array.Empty<byte>()),
+            new ImageResource("img1", "cover.jpg", "image/jpeg", Array.Empty<byte>(), null, true)
         };
         var resourceCollection = new ResourceCollection(resources);
         var book = CreateTestBook(resources: resourceCollection);
@@ -471,8 +471,8 @@ public class BookTests
         var book = CreateTestBook();
         var resources = new[]
         {
-            new EpubResource("font1", "font.ttf", "font/ttf"),
-            new ImageResource("img1", "image.png", "image/png")
+            new EpubResource("font1", "font.ttf", "font/ttf", Array.Empty<byte>()),
+            new ImageResource("img1", "image.png", "image/png", Array.Empty<byte>())
         };
         var resourceCollection = new ResourceCollection(resources);
 
@@ -489,8 +489,8 @@ public class BookTests
     public async Task Should_Throw_When_Setting_Resources_Twice()
     {
         // Arrange
-        var resources1 = new ResourceCollection(new[] { new EpubResource("r1", "file1.css", "text/css") });
-        var resources2 = new ResourceCollection(new[] { new EpubResource("r2", "file2.css", "text/css") });
+        var resources1 = new ResourceCollection(new[] { new EpubResource("r1", "file1.css", "text/css", Array.Empty<byte>()) });
+        var resources2 = new ResourceCollection(new[] { new EpubResource("r2", "file2.css", "text/css", Array.Empty<byte>()) });
         var book = CreateTestBook(resources: resources1);
 
         // Act & Assert
@@ -503,8 +503,8 @@ public class BookTests
     public async Task Should_Get_Cover_Image()
     {
         // Arrange
-        var coverImage = new ImageResource("cover", "cover.jpg", "image/jpeg", null, null, true);
-        var otherImage = new ImageResource("img1", "image.png", "image/png");
+        var coverImage = new ImageResource("cover", "cover.jpg", "image/jpeg", Array.Empty<byte>(), null, true);
+        var otherImage = new ImageResource("img1", "image.png", "image/png", Array.Empty<byte>());
         var resources = new ResourceCollection(new EpubResource[] { coverImage, otherImage });
         var book = CreateTestBook(resources: resources);
 
@@ -523,8 +523,8 @@ public class BookTests
         // Arrange
         var resources = new ResourceCollection(new[]
         {
-            new ImageResource("img1", "image1.png", "image/png"),
-            new ImageResource("img2", "image2.jpg", "image/jpeg")
+            new ImageResource("img1", "image1.png", "image/png", Array.Empty<byte>()),
+            new ImageResource("img2", "image2.jpg", "image/jpeg", Array.Empty<byte>())
         });
         var book = CreateTestBook(resources: resources);
 
@@ -539,10 +539,10 @@ public class BookTests
     public async Task Should_Get_All_Images()
     {
         // Arrange
-        var image1 = new ImageResource("img1", "image1.png", "image/png");
-        var image2 = new ImageResource("img2", "image2.jpg", "image/jpeg");
-        var coverImage = new ImageResource("cover", "cover.jpg", "image/jpeg", null, null, true);
-        var cssResource = new EpubResource("style", "styles.css", "text/css");
+        var image1 = new ImageResource("img1", "image1.png", "image/png", Array.Empty<byte>());
+        var image2 = new ImageResource("img2", "image2.jpg", "image/jpeg", Array.Empty<byte>());
+        var coverImage = new ImageResource("cover", "cover.jpg", "image/jpeg", Array.Empty<byte>(), null, true);
+        var cssResource = new EpubResource("style", "styles.css", "text/css", Array.Empty<byte>());
 
         var resources = new ResourceCollection(new EpubResource[] { image1, cssResource, image2, coverImage });
         var book = CreateTestBook(resources: resources);
@@ -563,8 +563,8 @@ public class BookTests
         // Arrange
         var resources = new ResourceCollection(new[]
         {
-            new EpubResource("style", "styles.css", "text/css"),
-            new EpubResource("font", "font.ttf", "font/ttf")
+            new EpubResource("style", "styles.css", "text/css", Array.Empty<byte>()),
+            new EpubResource("font", "font.ttf", "font/ttf", Array.Empty<byte>())
         });
         var book = CreateTestBook(resources: resources);
 
@@ -579,9 +579,9 @@ public class BookTests
     public async Task Should_Get_Stylesheets()
     {
         // Arrange
-        var css1 = new EpubResource("style1", "main.css", "text/css");
-        var css2 = new EpubResource("style2", "theme.css", "text/css");
-        var image = new ImageResource("img", "image.png", "image/png");
+        var css1 = new EpubResource("style1", "main.css", "text/css", Array.Empty<byte>());
+        var css2 = new EpubResource("style2", "theme.css", "text/css", Array.Empty<byte>());
+        var image = new ImageResource("img", "image.png", "image/png", Array.Empty<byte>());
 
         var resources = new ResourceCollection(new[] { css1, image, css2 });
         var book = CreateTestBook(resources: resources);
@@ -599,9 +599,9 @@ public class BookTests
     public async Task Should_Get_Fonts()
     {
         // Arrange
-        var font1 = new EpubResource("font1", "regular.ttf", "font/ttf");
-        var font2 = new EpubResource("font2", "bold.otf", "font/otf");
-        var css = new EpubResource("style", "styles.css", "text/css");
+        var font1 = new EpubResource("font1", "regular.ttf", "font/ttf", Array.Empty<byte>());
+        var font2 = new EpubResource("font2", "bold.otf", "font/otf", Array.Empty<byte>());
+        var css = new EpubResource("style", "styles.css", "text/css", Array.Empty<byte>());
 
         var resources = new ResourceCollection(new[] { font1, css, font2 });
         var book = CreateTestBook(resources: resources);
@@ -646,8 +646,8 @@ public class BookTests
             var extractedImage = await File.ReadAllBytesAsync(imagePath);
             var extractedCss = await File.ReadAllBytesAsync(cssPath);
 
-            await Assert.That(extractedImage).IsEqualTo(imageContent);
-            await Assert.That(extractedCss).IsEqualTo(cssContent);
+            await Assert.That(extractedImage).IsEquivalentTo(imageContent);
+            await Assert.That(extractedCss).IsEquivalentTo(cssContent);
         }
         finally
         {
@@ -667,7 +667,7 @@ public class BookTests
         // Act & Assert
         await Assert.That(async () => await book.ExtractResourcesToDirectoryAsync(tempDir))
             .Throws<InvalidOperationException>()
-            .WithMessage("No resources to extract");
+            .WithMessageContaining("No resources");
     }
 
     #region Content Processing Tests

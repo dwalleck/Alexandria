@@ -27,7 +27,7 @@ public class BookTitleTests
         // Act & Assert
         await Assert.That(() => new BookTitle(title!))
             .Throws<ArgumentException>()
-            .WithMessage("Title cannot be empty");
+            .WithMessageContaining("Title cannot be empty");
     }
 
     [Test]
@@ -39,7 +39,7 @@ public class BookTitleTests
         // Act & Assert
         await Assert.That(() => new BookTitle(longTitle))
             .Throws<ArgumentException>()
-            .WithMessage("Title cannot exceed 500 characters");
+            .WithMessageContaining("Title cannot exceed 500 characters");
     }
 
     [Test]
