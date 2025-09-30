@@ -1,12 +1,12 @@
 using System.Threading.Tasks;
-
 using System.IO;
 using System.Threading;
 using Alexandria.Domain.Entities;
 using Alexandria.Domain.Errors;
+using Alexandria.Domain.Interfaces;
 using OneOf;
 
-namespace Alexandria.Domain.Interfaces;
+namespace Alexandria.Application.Services;
 
 /// <summary>
 /// Interface for loading EPUB books from various sources using OneOf

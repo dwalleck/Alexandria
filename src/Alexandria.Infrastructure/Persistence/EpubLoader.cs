@@ -1,3 +1,4 @@
+using Alexandria.Application.Services;
 using Alexandria.Domain.Entities;
 using Alexandria.Domain.Errors;
 using Alexandria.Domain.Interfaces;
