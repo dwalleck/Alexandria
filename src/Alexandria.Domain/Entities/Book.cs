@@ -17,6 +17,23 @@ public sealed class Book
     private NavigationStructure? _navigationStructure;
     private ResourceCollection? _resources;
 
+    /// <summary>
+    /// Initializes a new instance of the Book class.
+    /// </summary>
+    /// <param name="title">The primary title of the book</param>
+    /// <param name="alternateTitles">Optional alternate titles for the book</param>
+    /// <param name="authors">The authors of the book (at least one required)</param>
+    /// <param name="chapters">The chapters of the book (at least one required). Chapters are automatically sorted by their Order property to ensure correct reading sequence.</param>
+    /// <param name="identifiers">The identifiers for the book (e.g., ISBN)</param>
+    /// <param name="language">The primary language of the book</param>
+    /// <param name="metadata">Additional metadata for the book</param>
+    /// <param name="navigationStructure">Optional navigation structure (table of contents)</param>
+    /// <param name="resources">Optional collection of resources (images, fonts, etc.)</param>
+    /// <remarks>
+    /// Chapters provided to the constructor will be automatically sorted by their Order property
+    /// to ensure they are always accessed in the correct reading sequence, regardless of the
+    /// order they were provided in.
+    /// </remarks>
     public Book(
         BookTitle title,
         IEnumerable<BookTitle>? alternateTitles,
