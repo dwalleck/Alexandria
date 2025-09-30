@@ -674,4 +674,94 @@ public class BookTests
 
 
     #endregion
+
+    #region Issue #1 Required Tests
+
+    [Test]
+    public async Task Should_Generate_Id_When_Not_Provided()
+    {
+        // Arrange & Act
+        var book1 = CreateTestBook();
+        var book2 = CreateTestBook();
+
+        // Assert
+        await Assert.That(book1.Id).IsNotEqualTo(Guid.Empty);
+        await Assert.That(book2.Id).IsNotEqualTo(Guid.Empty);
+        await Assert.That(book1.Id).IsNotEqualTo(book2.Id);
+    }
+
+    [Test]
+    public async Task Should_Use_Provided_Id()
+    {
+        // Arrange
+        var expectedId = Guid.NewGuid();
+        var title = new BookTitle("Test");
+        var authors = new List<Author> { new("Author") };
+        var chapters = new List<Chapter> { new("id", "Title", "Content", 0, "href") };
+        var language = new Language("en");
+
+        // Act
+        var book = new Book(
+            title,
+            new List<BookTitle>(),
+            authors,
+            chapters,
+            new List<BookIdentifier>(),
+            language,
+            new BookMetadata(),
+            null,
+            null,
+            expectedId);
+
+        // Assert
+        await Assert.That(book.Id).IsEqualTo(expectedId);
+    }
+
+    [Test]
+    [Arguments(200)]
+    [Arguments(250)]
+    [Arguments(300)]
+    [Arguments(500)]
+    public async Task Should_Calculate_Reading_Time_With_Custom_WPM(int wordsPerMinute)
+    {
+        // Arrange
+        // 10 chapters * 250 words = 2500 words total
+        var book = CreateTestBook(10);
+
+        // Act
+        var readingTime = book.GetEstimatedReadingTime(wordsPerMinute);
+
+        // Assert
+        var expectedMinutes = Math.Max(1, (int)Math.Ceiling(2500.0 / wordsPerMinute));
+        await Assert.That(readingTime.TotalMinutes).IsEqualTo(expectedMinutes);
+    }
+
+    [Test]
+    public async Task Should_Get_Chapter_By_Index_Valid()
+    {
+        // Arrange
+        var book = CreateTestBook(5);
+
+        // Act
+        var chapter = book.GetChapterByOrder(2);
+
+        // Assert
+        await Assert.That(chapter).IsNotNull();
+        await Assert.That(chapter!.Order).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Should_Return_Null_For_Invalid_Chapter_Index()
+    {
+        // Arrange
+        var book = CreateTestBook(3);
+
+        // Act
+        var chapter = book.GetChapterByOrder(999);
+
+        // Assert
+        await Assert.That(chapter).IsNull();
+    }
+
+    #endregion
 }
