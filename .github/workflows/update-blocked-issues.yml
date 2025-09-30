@@ -46,8 +46,8 @@ jobs:
 
               console.log(`  - Is blocked by #${closedIssue.number}`);
 
-              // Extract all blocker issue numbers from the "Blocked By" section
-              const blockedByRegex = /Blocked By:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
+              // Extract all blocker issue numbers from the "Blocked By" section (handles markdown bold/italic)
+              const blockedByRegex = /\*{0,2}Blocked By\*{0,2}:[^\n]*(?:\n[^\n]*#\d+[^\n]*)*/gi;
               const blockedBySection = issue.body.match(blockedByRegex);
 
               if (!blockedBySection) {
