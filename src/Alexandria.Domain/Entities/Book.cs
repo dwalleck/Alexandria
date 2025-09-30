@@ -29,6 +29,7 @@ public sealed class Book
     /// <param name="metadata">Additional metadata for the book</param>
     /// <param name="navigationStructure">Optional navigation structure (table of contents)</param>
     /// <param name="resources">Optional collection of resources (images, fonts, etc.)</param>
+    /// <param name="id">Optional unique identifier. If not provided, a new Guid will be generated.</param>
     /// <remarks>
     /// Chapters provided to the constructor will be automatically sorted by their Order property
     /// to ensure they are always accessed in the correct reading sequence, regardless of the
@@ -43,8 +44,10 @@ public sealed class Book
         Language language,
         BookMetadata metadata,
         NavigationStructure? navigationStructure = null,
-        ResourceCollection? resources = null)
+        ResourceCollection? resources = null,
+        Guid? id = null)
     {
+        Id = id ?? Guid.NewGuid();
         Title = title ?? throw new ArgumentNullException(nameof(title));
         AlternateTitles = alternateTitles?.ToList() ?? [];
         _authors = authors?.ToList() ?? throw new ArgumentNullException(nameof(authors));
@@ -61,6 +64,11 @@ public sealed class Book
         if (_authors.Count == 0)
             throw new ArgumentException("A book must have at least one author", nameof(authors));
     }
+
+    /// <summary>
+    /// Unique identifier for the book
+    /// </summary>
+    public Guid Id { get; }
 
     public BookTitle Title { get; }
     public IReadOnlyList<BookTitle> AlternateTitles { get; }
