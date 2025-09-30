@@ -364,13 +364,22 @@ public sealed class Book
         var primaryAuthor = GetPrimaryAuthor();
         var year = GetPublicationYear()?.ToString() ?? "n.d.";
         var title = Title.Value;
+        var authorCount = _authors.Count;
 
         return style switch
         {
-            CitationStyle.APA => $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstInitial()}. ({year}). {title}. {Metadata.Publisher ?? "Unknown Publisher"}.",
-            CitationStyle.MLA => $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}.",
-            CitationStyle.Chicago => $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}.",
-            _ => $"{primaryAuthor.Name}. {title}. {year}."
+            CitationStyle.APA => authorCount >= 3
+                ? $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstInitial()}., et al. ({year}). {title}. {Metadata.Publisher ?? "Unknown Publisher"}."
+                : $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstInitial()}. ({year}). {title}. {Metadata.Publisher ?? "Unknown Publisher"}.",
+            CitationStyle.MLA => authorCount >= 3
+                ? $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}, et al. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}."
+                : $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}.",
+            CitationStyle.Chicago => authorCount >= 3
+                ? $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}, et al. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}."
+                : $"{primaryAuthor.GetLastName()}, {primaryAuthor.GetFirstName()}. {title}. {Metadata.Publisher ?? "Unknown Publisher"}, {year}.",
+            _ => authorCount >= 3
+                ? $"{primaryAuthor.Name}, et al. {title}. {year}."
+                : $"{primaryAuthor.Name}. {title}. {year}."
         };
     }
 
@@ -390,13 +399,13 @@ public sealed class Book
             dict["AlternateTitles"] = string.Join("; ", AlternateTitles.Select(t => t.Value));
 
         if (_identifiers.Count > 0)
-            dict["Identifiers"] = string.Join("; ", _identifiers.Select(i => $"{i.Scheme}: {i.Value}"));
+            dict["Identifiers"] = string.Join("; ", _identifiers.Select(i => $"{i.Scheme?.ToLower()}: {i.Value}"));
 
         if (!string.IsNullOrEmpty(Metadata.Publisher))
             dict["Publisher"] = Metadata.Publisher;
 
         if (Metadata.PublicationDate.HasValue)
-            dict["PublicationDate"] = Metadata.PublicationDate.Value.ToString("yyyy-MM-dd");
+            dict["PublicationDate"] = Metadata.PublicationDate.Value.ToString("MM/dd/yyyy");
 
         if (!string.IsNullOrEmpty(Metadata.Description))
             dict["Description"] = Metadata.Description;
